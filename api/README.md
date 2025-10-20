@@ -15,7 +15,21 @@ Planora Backend handles:
 
 ## 🚀 Setup
 
-1. Run locally
+#### 1. Environment Variables
+
+The project uses `.env.local` files to manage environment variables for both the **Next.js frontend** and **Rust backend**.
+Before running the application, copy the sample environment files:
+
+```bash
+    # From the project root
+    cp .env.example .env.local
+```
+
+> ⚠️ Important:
+Do not commit `.env.local` — it contains sensitive data.
+Use `.env.example` to share safe configuration templates.
+
+#### 2. Run locally
 
 ```bash
     cargo run
