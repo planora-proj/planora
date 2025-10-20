@@ -1,0 +1,17 @@
+[package]
+name = "planora-api"
+version = "0.0.1"
+authors = ["sajeevan"]
+edition.workspace = true
+
+[[bin]]
+name = "planora-api"
+path = "src/main.rs"
+
+[dependencies]
+
+# web framework
+actix-web = { version = "4" }
+
+# serialization
+serde = "1.0.228"
