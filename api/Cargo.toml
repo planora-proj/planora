@@ -15,3 +15,6 @@ actix-web = { version = "4" }
 
 # serialization
 serde = "1.0.228"
+
+# misc
+dotenvy = "0.15"
