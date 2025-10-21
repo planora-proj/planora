@@ -13,6 +13,7 @@ path = "src/main.rs"
 
 # web framework
 actix-web = { version = "4" }
+actix-cors = "0.7"
 
 # serialization
 serde = "1.0.228"

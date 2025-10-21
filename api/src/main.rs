@@ -3,6 +3,7 @@
     Copyright (C) 2025 Planora
 */
 
+use actix_cors::Cors;
 use actix_web::{App, HttpServer};
 
 mod config;
@@ -11,16 +12,40 @@ mod telemetry;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    // config
     let config = config::Config::from_env();
+    let is_production_env = config.is_production_env();
+    let web_url = config.next_base_url.clone();
 
     // telemetry
     telemetry::init();
 
     tracing::info!("Starting server at http://{}", config.addr());
-    HttpServer::new(move || App::new().service(routes::health::health_check))
-        .bind(config.addr())?
-        .run()
-        .await?;
+
+    HttpServer::new(move || {
+        use actix_web::http::header;
+
+        // For development: allow all cross-origin requests (CORS)
+        // In production, restrict CORS to specific allowed origins for security.
+        let cors = if !is_production_env {
+            Cors::permissive()
+        } else {
+            Cors::default()
+                .allowed_origin(&web_url)
+                .allowed_methods(vec!["GET", "POST", "PUT", "DELETE", "OPTIONS"])
+                .allowed_headers(vec![
+                    header::AUTHORIZATION,
+                    header::ACCEPT,
+                    header::CONTENT_TYPE,
+                ])
+                .max_age(3600)
+        };
+
+        App::new().wrap(cors).service(routes::health::health_check)
+    })
+    .bind(config.addr())?
+    .run()
+    .await?;
 
     Ok(())
 }
