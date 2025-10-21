@@ -17,5 +17,13 @@ actix-web = { version = "4" }
 # serialization
 serde = "1.0.228"
 
+# telemetry
+tracing = { version = "0.1.4" }
+tracing-subscriber = { version = "0.3.2", features = [
+    "env-filter",
+    "fmt",
+    "json",
+] }
+
 # misc
 dotenvy = "0.15"
