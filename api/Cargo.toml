@@ -3,6 +3,7 @@ name = "planora-api"
 version = "0.0.1"
 authors = ["sajeevan"]
 edition.workspace = true
+license.workspace = true
 
 [[bin]]
 name = "planora-api"
