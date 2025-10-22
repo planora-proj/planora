@@ -1,7 +1,7 @@
 # Planora Playground
 
 A lightweight playground inside the Planora project for testing new functionalities, experiments, and rapid prototyping.  
-This service provides a simple **web frontend** served via **Express.js**.
+This service provides a simple **web frontend** served via **Vite**.
 
 ---
 
@@ -10,13 +10,6 @@ This service provides a simple **web frontend** served via **Express.js**.
 - Serves a minimal frontend for experimenting with features before integrating into the main Planora web.
 - Can be used for testing APIs, WebSocket connections, or UI components.
 - Acts as a safe sandbox for trying out new ideas without affecting production or main development code.
-
----
-
-## 🧱 Tech Stack
-
-- **Frontend:** Basic HTML/JS served via Express  
-- **Backend / Server:** Actix Web
 
 ---
 
