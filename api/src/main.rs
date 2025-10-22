@@ -4,11 +4,12 @@
 */
 
 use actix_cors::Cors;
-use actix_web::{App, HttpServer};
+use actix_web::{App, HttpServer, web};
 
 mod config;
 mod routes;
 mod telemetry;
+mod ws;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -41,7 +42,10 @@ async fn main() -> std::io::Result<()> {
                 .max_age(3600)
         };
 
-        App::new().wrap(cors).service(routes::health::health_check)
+        App::new()
+            .wrap(cors)
+            .route("/ws", web::get().to(ws::ws))
+            .service(routes::health::health_check)
     })
     .bind(config.addr())?
     .run()

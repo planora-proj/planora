@@ -14,6 +14,7 @@ path = "src/main.rs"
 # web framework
 actix-web = { version = "4" }
 actix-cors = "0.7"
+actix-ws = "0.3.0"
 
 # serialization
 serde = "1.0.228"
@@ -28,3 +29,4 @@ tracing-subscriber = { version = "0.3.2", features = [
 
 # misc
 dotenvy = "0.15"
+futures-util = "0.3.31"
