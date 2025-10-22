@@ -3,14 +3,11 @@
   "description": "playground project for testing new functionalities, experiments, and rapid prototyping",
   "private": true,
   "scripts": {
-    "dev": "nodemon server.js"
+    "dev": "vite"
   },
   "author": "sajeevan",
   "packageManager": "pnpm@10.18.2",
-  "dependencies": {
-    "express": "^5.1.0"
-  },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "vite": "^7.1.11"
   }
 }
