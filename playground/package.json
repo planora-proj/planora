@@ -10,7 +10,8 @@
   "dependencies": {
     "@vitejs/plugin-react": "^5.0.4",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "react-use-websocket": "^4.13.0"
   },
   "devDependencies": {
     "vite": "^7.1.11"
