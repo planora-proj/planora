@@ -45,7 +45,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(cors)
             .route("/ws", web::get().to(ws::ws))
-            .service(routes::health::health_check)
+            .service(routes::v1::v1_scope())
     })
     .bind(config.addr())?
     .run()
