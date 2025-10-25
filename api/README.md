@@ -13,6 +13,14 @@ Planora Backend handles:
 - Metrics, traces, and logs through OpenTelemetry and Prometheus
 - Database interactions using SQLx with PostgreSQL
 
+## 🌐 Deployment
+
+The API is deployed under [Planora API](https://api.planora.sbs/v1/health) and currently exposes the following public endpoint:
+
+- `/v1/health` — returns a simple health check response to verify the API is running.
+
+> Note: All other endpoints are protected or internal and not publicly exposed.
+
 ## 🚀 Setup
 
 #### 1. Environment Variables
