@@ -1,19 +1,19 @@
 use actix_web::{HttpResponse, Responder, get};
-use chrono::Utc;
 
-use crate::routes::common::ApiResult;
+use crate::routes::common::{ApiResult, time};
 
+#[cfg_attr(test, derive(serde::Deserialize))]
 #[derive(serde::Serialize)]
 struct HealthInfo {
     timestamp: String,
-    version: &'static str,
+    version: String,
 }
 
 #[get("/health")]
 async fn health_check() -> impl Responder {
     let info = HealthInfo {
-        timestamp: Utc::now().format("%Y-%m-%d %H:%M:%S").to_string(),
-        version: env!("CARGO_PKG_VERSION"),
+        timestamp: time::current_utc_timestamp(),
+        version: env!("CARGO_PKG_VERSION").to_string(),
     };
 
     HttpResponse::Ok().json(ApiResult::success(info, Some("ok".to_string())))

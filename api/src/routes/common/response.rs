@@ -1,3 +1,4 @@
+#[cfg_attr(test, derive(serde::Deserialize))]
 #[derive(serde::Serialize)]
 pub struct ApiResult<T> {
     pub success: bool,
@@ -31,6 +32,7 @@ impl<T> ApiResult<T> {
     }
 }
 
+#[cfg_attr(test, derive(serde::Deserialize))]
 #[derive(serde::Serialize)]
 pub struct PaginatedResult<T> {
     pub items: Vec<T>,
@@ -64,6 +66,7 @@ impl<T> PaginatedResult<T> {
     }
 }
 
+#[cfg_attr(test, derive(serde::Serialize))]
 #[derive(serde::Deserialize)]
 pub struct PaginationQuery {
     pub page: Option<u64>,
