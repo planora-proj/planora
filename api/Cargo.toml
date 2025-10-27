@@ -30,3 +30,4 @@ tracing-subscriber = { version = "0.3.2", features = [
 # misc
 dotenvy = "0.15"
 futures-util = "0.3.31"
+chrono = "0.4.42"
