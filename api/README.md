@@ -21,24 +21,73 @@ The API is deployed under [Planora API](https://api.planora.sbs/v1/health) and c
 
 > Note: All other endpoints are protected or internal and not publicly exposed.
 
-## 🚀 Setup
+## ⚙️ Develoment Setup
 
-#### 1. Environment Variables
+#### 1. Prerequisites
 
-The project uses `.env.local` files to manage environment variables for both the **Next.js frontend** and **Rust backend**.
-Before running the application, copy the sample environment files:
+Ensure you have the following installed:
+- [Rust (latest stable)](https://rust-lang.org/tools/install)
+- [Docker](https://docs.docker.com/engine/install/)
+- **SQLx CLI (for migrations)**
 
+To install SQLx CLI:
 ```bash
-    # From the project root
-    cp .env.example .env.local
+    cargo install sqlx-cli --no-default-features --features native-tls,postgres
 ```
 
-> ⚠️ Important:
+#### 2. Run PostgreSQL for Development
+
+For local development, run a dedicated **Postgresql** container:
+```bash
+    docker run --name planora -d \
+    -e POSTGRES_USER=planora \
+    -e POSTGRES_PASSWORD=planora \
+    -e POSTGRES_DB=planora \
+    -p 5432:5432 \
+    -v planora_pgdata:/var/lib/postgresql/data \
+    postgres:latest
+```
+This creates a reusable local database instance named planora with persistent data stored in the `planora_pgdata` volume
+
+#### 3. Configure Environment Variables
+
+Copy the example environment configuration and update it as needed:
+
+```bash
+    # from the root
+    cp .env.sample .env.local
+```
+Make sure your .env.local includes a valid database URL:
+```bash
+    PG_DATABASE_URL=postgres://planora:planora@localhost:5432/planora
+```
+> ⚠️ **Important**:
 Do not commit `.env.local` — it contains sensitive data.
-Use `.env.example` to share safe configuration templates.
+Use `.env.sample` to share safe configuration templates.
 
-#### 2. Run locally
+#### 4. Run Database Migrations
 
+Once PostgreSQL is running and your .env.exa is configured, run the SQLx migrations:
+```bash
+    sqlx migrate run -D postgres://planora:planora@localhost:5432/planora
+```
+This applies all schema changes to your local development database.
+
+#### 5. Start the Development Server
+
+After the database is up and migrations are applied, start the backend:
 ```bash
     cargo run
 ```
+> 💡 **Note:** Always make sure your PostgreSQL container is running before starting the backend.
+
+
+## 🧠 Tips for Development
+
+- If you change SQL schema, remember to run:
+```bash
+    sqlx migrate add <migration_name>
+    sqlx migrate run
+```
+
+- If connection issues occur, ensure PostgreSQL is running and accessible at `localhost:5432`
