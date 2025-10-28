@@ -4,6 +4,7 @@ const DEFAULT_SERVER_HOST: &'static str = "127.0.0.1";
 const DEFAULT_SERVER_PORT: &'static str = "8080";
 const DEFAULT_NEXT_APP_IP: &'static str = "http://localhost:3000";
 const DEFAULT_APP_ENVIRONMENT: &'static str = "development";
+const DEFAULT_PG_DATABASE_URL: &'static str = "postgres://planora:planora@localhost:5432/planora";
 
 #[derive(Debug, Clone)]
 pub struct Config {
@@ -11,6 +12,7 @@ pub struct Config {
     pub port: u16,
     pub next_base_url: String,
     pub app_env: String,
+    pub pg_url: String,
 }
 
 impl Config {
@@ -25,12 +27,14 @@ impl Config {
         let next_base_url =
             env::var("NEXT_PUBLIC_BASE_URL").unwrap_or(DEFAULT_NEXT_APP_IP.to_string());
         let app_env = env::var("APP_ENV").unwrap_or(DEFAULT_APP_ENVIRONMENT.to_string());
+        let pg_url = env::var("PG_DATABASE_URL").unwrap_or(DEFAULT_PG_DATABASE_URL.to_string());
 
         Self {
             host,
             port,
             next_base_url,
             app_env,
+            pg_url,
         }
     }
 
