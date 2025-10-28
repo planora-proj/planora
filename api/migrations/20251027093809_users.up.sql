@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS users (
     user_tag TEXT UNIQUE,
     username VARCHAR(255) NOT NULL UNIQUE,
     email VARCHAR(255) NOT NULL UNIQUE,
-    password TEXT NOT NULL,
+    password TEXT,
     timezone TEXT,
     avatar_url TEXT,
 	google_sub TEXT UNIQUE,

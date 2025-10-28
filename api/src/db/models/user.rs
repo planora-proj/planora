@@ -8,7 +8,7 @@ pub struct User {
     pub user_tag: Option<String>,
     pub username: String,
     pub email: String,
-    pub password: String,
+    pub password: Option<String>,
     pub timezone: Option<String>,
     pub avatar_url: Option<String>,
     pub google_sub: Option<String>,
