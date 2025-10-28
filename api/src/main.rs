@@ -7,6 +7,7 @@ use actix_cors::Cors;
 use actix_web::{App, HttpServer, web};
 
 mod config;
+mod db;
 mod routes;
 mod telemetry;
 mod ws;
@@ -21,8 +22,15 @@ async fn main() -> std::io::Result<()> {
     // telemetry
     telemetry::init();
 
-    tracing::info!("Starting server at http://{}", config.addr());
+    // database
+    let manager = db::manager::DbManager::new();
+    manager
+        .init_pool("planora", &config.pg_url.clone(), 5)
+        .await
+        .expect("Failed to connect to Postgres");
 
+    // actix server
+    tracing::info!("Starting server at http://{}", config.addr());
     HttpServer::new(move || {
         use actix_web::http::header;
 
@@ -44,6 +52,7 @@ async fn main() -> std::io::Result<()> {
 
         App::new()
             .wrap(cors)
+            .app_data(web::Data::new(manager.clone()))
             .route("/ws", web::get().to(ws::ws))
             .service(routes::v1::v1_scope())
     })

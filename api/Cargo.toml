@@ -16,6 +16,18 @@ actix-web = { version = "4" }
 actix-cors = "0.7"
 actix-ws = "0.3.0"
 
+# database
+sqlx = { version = "0.7", features = [
+    "runtime-tokio",
+    "postgres",
+    "macros",
+    "uuid",
+    "chrono",
+] }
+
+# runtime
+tokio = { version = "1.48.0", features = ["sync", "signal"] }
+
 # serialization
 serde = "1.0.228"
 
