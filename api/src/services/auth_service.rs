@@ -127,3 +127,69 @@ impl JwtService {
         Ok(new_access_token)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const JWT_SECRET: &'static str = "test_secret";
+    const JWT_ACCESS_EXPIRY_MINUTES: i64 = 10;
+    const JWT_REFRESH_EXPIRY_DAYS: i64 = 1;
+    const USER_ID_1: uuid::Uuid = uuid::Uuid::from_u128(1);
+
+    #[test]
+    fn test_generate_and_verify_access_token() {
+        let jwt_service = JwtService::new(
+            JWT_SECRET.to_string(),
+            JWT_ACCESS_EXPIRY_MINUTES,
+            JWT_REFRESH_EXPIRY_DAYS,
+        );
+
+        let (access_token, refresh_token) = jwt_service
+            .generate_tokens(USER_ID_1)
+            .expect("failed to generate tokens");
+
+        let claims = jwt_service.verify_token(&access_token).unwrap();
+        assert_eq!(claims.sub, USER_ID_1);
+        assert_eq!(claims.token_type, "access");
+
+        let refresh_claims = jwt_service.verify_token(&refresh_token).unwrap();
+        assert_eq!(refresh_claims.sub, USER_ID_1);
+        assert_eq!(refresh_claims.token_type, "refresh");
+    }
+
+    #[test]
+    fn test_invalid_token() {
+        let jwt_service = JwtService::new(
+            JWT_SECRET.to_string(),
+            JWT_ACCESS_EXPIRY_MINUTES,
+            JWT_REFRESH_EXPIRY_DAYS,
+        );
+
+        let invalid_token = "invalid_token";
+
+        let result = jwt_service.verify_token(invalid_token);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_generate_access_from_refresh_token() {
+        let jwt_service = JwtService::new(
+            JWT_SECRET.to_string(),
+            JWT_ACCESS_EXPIRY_MINUTES,
+            JWT_REFRESH_EXPIRY_DAYS,
+        );
+
+        let (_access_token, refresh_token) = jwt_service
+            .generate_tokens(USER_ID_1)
+            .expect("failed to generate tokens");
+
+        let new_access_token = jwt_service
+            .generate_access_token_from_refresh(refresh_token)
+            .unwrap();
+
+        let claims = jwt_service.verify_token(&new_access_token).unwrap();
+        assert_eq!(claims.sub, USER_ID_1);
+        assert_eq!(claims.token_type, "access");
+    }
+}
