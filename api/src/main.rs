@@ -9,6 +9,7 @@ use actix_web::{App, HttpServer, web};
 mod config;
 mod db;
 mod routes;
+pub mod services;
 mod telemetry;
 mod ws;
 
