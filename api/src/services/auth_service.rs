@@ -18,6 +18,8 @@ pub struct JwtService {
 }
 
 impl JwtService {
+    pub const JWT_SESSION_KEY: &'static str = "jwt_token";
+
     pub fn new(secret: String, access_expiry_minutes: i64, refresh_expiry_days: i64) -> Self {
         Self {
             secret,
