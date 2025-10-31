@@ -14,7 +14,7 @@ impl<'a> UserRepo<'a> {
         Self { pool }
     }
 
-    pub async fn create_user(&self, user: &User) -> sqlx::Result<()> {
+    pub async fn create_user(&self, user: &User) -> sqlx::Result<User> {
         let query = Query::insert()
             .into_table(Alias::new(PG_TABLE_USERS))
             .columns([
@@ -35,10 +35,14 @@ impl<'a> UserRepo<'a> {
                 user.avatar_url.clone().into(),
                 user.google_sub.clone().into(),
             ])
+            .returning_all()
             .to_string(PostgresQueryBuilder);
 
-        sqlx::query(&query).execute(self.pool).await?;
-        Ok(())
+        let user = sqlx::query_as::<_, User>(&query)
+            .fetch_one(self.pool)
+            .await?;
+
+        Ok(user)
     }
 
     pub async fn find_by_email(&self, email: String) -> sqlx::Result<Option<User>> {
