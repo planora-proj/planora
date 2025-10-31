@@ -7,6 +7,9 @@ use super::ApiResult;
 pub enum ApiError {
     #[error("Database connection failed: {0}")]
     DatabaseError(#[from] sqlx::Error),
+
+    #[error("jwt service failed")]
+    JwtError(#[from] jsonwebtoken::errors::Error),
 }
 
 impl ResponseError for ApiError {
@@ -15,6 +18,11 @@ impl ResponseError for ApiError {
 
         match self {
             DatabaseError(err) => {
+                tracing::error!(error = %err);
+                HttpResponse::InternalServerError()
+                    .json(ApiResult::<()>::error("Internal server error"))
+            }
+            JwtError(err) => {
                 tracing::error!(error = %err);
                 HttpResponse::InternalServerError()
                     .json(ApiResult::<()>::error("Internal server error"))
