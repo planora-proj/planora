@@ -66,5 +66,5 @@ async fn signup(
 
     Ok(HttpResponse::Ok()
         .cookie(cookie)
-        .body("logged in successfully!"))
+        .json(ApiResult::<()>::success_message("signed up successfully")))
 }
