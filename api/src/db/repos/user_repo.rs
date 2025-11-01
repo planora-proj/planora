@@ -69,6 +69,30 @@ impl<'a> UserRepo<'a> {
         Ok(user)
     }
 
+    pub async fn find_by_userid(&self, userid: uuid::Uuid) -> sqlx::Result<Option<User>> {
+        let query = Query::select()
+            .columns([
+                Alias::new("user_id"),
+                Alias::new("user_tag"),
+                Alias::new("username"),
+                Alias::new("email"),
+                Alias::new("password"),
+                Alias::new("timezone"),
+                Alias::new("avatar_url"),
+                Alias::new("google_sub"),
+                Alias::new("created_at"),
+                Alias::new("updated_at"),
+            ])
+            .from(Alias::new(PG_TABLE_USERS))
+            .and_where(Expr::col(Alias::new("user_id")).eq(userid.to_string()))
+            .to_string(PostgresQueryBuilder);
+
+        let user = sqlx::query_as::<_, User>(&query)
+            .fetch_optional(self.pool)
+            .await?;
+        Ok(user)
+    }
+
     pub async fn find_by_usertag(&self, usertag: String) -> sqlx::Result<Option<User>> {
         let query = Query::select()
             .columns([
