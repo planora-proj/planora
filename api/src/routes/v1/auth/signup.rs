@@ -5,9 +5,9 @@ use actix_web::{
 };
 
 use crate::{
-    db::{manager::DbManager, models::User, repos::UserRepo},
+    db::{models::User, repos::UserRepo},
     routes::common::{ApiError, ApiResult},
-    services::JwtService,
+    services::{DbManager, JwtService},
 };
 
 #[cfg_attr(test, derive(serde::Serialize))]

@@ -6,8 +6,6 @@
 use actix_cors::Cors;
 use actix_web::{App, HttpServer, web};
 
-use crate::services::JwtService;
-
 mod config;
 mod db;
 mod routes;
@@ -25,15 +23,16 @@ async fn main() -> std::io::Result<()> {
     // telemetry
     telemetry::init();
 
+    /* services */
     // database
-    let manager = db::manager::DbManager::new();
+    let manager = services::DbManager::new();
     manager
         .init_pool("planora", &config.pg_url.clone(), 5)
         .await
         .expect("Failed to connect to Postgres");
 
-    // services
-    let jwt_service = JwtService::from_env();
+    // jwt
+    let jwt_service = services::JwtService::from_env();
 
     // actix server
     tracing::info!("Starting server at http://{}", config.addr());
