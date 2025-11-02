@@ -23,9 +23,9 @@ async fn profile(
     let token_cookie = if let Some(cookie) = req.cookie(JwtService::JWT_SESSION_KEY) {
         cookie
     } else {
-        return Ok(HttpResponse::BadRequest().json(ApiResult::<()>::error(
-            "Required header field is missing or invalid",
-        )));
+        return Ok(
+            HttpResponse::Unauthorized().json(ApiResult::<()>::error("authentication required"))
+        );
     };
 
     let pool = manager.get_pool("planora").await.unwrap();
