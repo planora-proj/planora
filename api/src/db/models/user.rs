@@ -8,6 +8,7 @@ pub struct User {
     pub user_tag: Option<String>,
     pub username: String,
     pub email: String,
+    #[serde(skip)]
     pub password: Option<String>,
     pub timezone: Option<String>,
     pub avatar_url: Option<String>,
