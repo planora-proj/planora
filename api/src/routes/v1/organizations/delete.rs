@@ -57,7 +57,7 @@ async fn delete_organization(
                 )));
             }
 
-            tracing::trace!("deleted the organization: {}", org_id);
+            tracing::debug!("deleted the organization: {}", org_id);
             org_repo.delete_by_orgid(org_id).await?
         }
         DeleteOrg {
@@ -69,7 +69,7 @@ async fn delete_organization(
                     "you don't have privilege to delete the organization",
                 )));
             }
-            tracing::trace!("deleted the organization: {}", subdomain);
+            tracing::debug!("deleted the organization: {}", subdomain);
             org_repo.delete_by_subdomain(subdomain).await?
         }
         _ => {

@@ -78,7 +78,7 @@ impl JwtService {
             &EncodingKey::from_secret(self.secret.as_ref()),
         )?;
 
-        tracing::trace!("Generated access, and refresh token for user: {}", user_id);
+        tracing::debug!("Generated access, and refresh token for user: {}", user_id);
         Ok((access_token, refresh_token))
     }
 
@@ -89,7 +89,7 @@ impl JwtService {
             &Validation::default(),
         )?;
 
-        tracing::trace!("verified jwt token for the user: {}", token_data.claims.sub);
+        tracing::debug!("verified jwt token for the user: {}", token_data.claims.sub);
         Ok(token_data.claims)
     }
 

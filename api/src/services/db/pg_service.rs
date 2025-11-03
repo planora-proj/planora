@@ -21,7 +21,7 @@ impl DbManager {
             Some(host_part) => host_part,
             None => "unknown-host",
         };
-        tracing::trace!(db_name = %name, host = %safe_url, "attempting to connect to PostgreSQL");
+        tracing::debug!(db_name = %name, host = %safe_url, "attempting to connect to PostgreSQL");
 
         match PgPoolOptions::new()
             .max_connections(max_connections)

@@ -1,6 +1,6 @@
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
-const DEFAULT_TRACE_LEVEL: &'static str = "trace";
+const DEFAULT_TRACE_LEVEL: &'static str = "debug";
 
 pub fn init() {
     // use `RUST_LOG` if available, otherwise default to `TRACE`

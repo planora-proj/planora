@@ -55,7 +55,7 @@ async fn create_organization(
             ..Default::default()
         })
         .await?;
-    tracing::trace!("created organization for {:?}", user);
+    tracing::debug!("created organization for {:?}", user);
 
     Ok(HttpResponse::Ok().json(ApiResult::<Organization>::success(
         inserted_org,
