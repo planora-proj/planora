@@ -1,12 +1,12 @@
 [package]
-name = "planora-api"
+name = "arx-gatehouse"
 version = "0.0.1"
 authors = ["sajeevan"]
 edition.workspace = true
 license.workspace = true
 
 [[bin]]
-name = "planora-api"
+name = "arx-gatehouse"
 path = "src/main.rs"
 
 [dependencies]
