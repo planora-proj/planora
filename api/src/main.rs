@@ -61,6 +61,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(jwt_service.clone()))
             .route("/ws", web::get().to(ws::ws))
             .service(routes::v1::v1_scope())
+            .service(routes::internal::internal_routes())
     })
     .bind(config.addr())?
     .run()
