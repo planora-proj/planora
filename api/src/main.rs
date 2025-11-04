@@ -57,6 +57,7 @@ async fn main() -> std::io::Result<()> {
 
         App::new()
             .wrap(cors)
+            .wrap(tracing_actix_web::TracingLogger::default())
             .app_data(web::Data::new(manager.clone()))
             .app_data(web::Data::new(jwt_service.clone()))
             .route("/ws", web::get().to(ws::ws))
