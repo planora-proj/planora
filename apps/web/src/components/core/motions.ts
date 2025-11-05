@@ -1,13 +1,31 @@
-export const motionConfig = {
-    transition: { duration: 0.25, ease: [0.25, 0.1, 0.25, 1.0] },
+import type { Variants } from "motion";
+
+export const fadeIn: Variants = {
+    hidden: {
+        opacity: 0,
+        transition: {
+            duration: 0.25,
+        },
+    },
+    show: {
+        opacity: 1,
+        transition: {
+            duration: 0.25,
+        },
+    },
 };
 
-export const fadeIn = {
-    hidden: { opacity: 0 },
-    show: { opacity: 1, transition: motionConfig.transition },
-};
-
-export const slideUp = {
+export const slideUp: Variants = {
     hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0, transition: motionConfig.transition },
+    show: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+};
+
+export const slideLeft: Variants = {
+    hidden: { opacity: 0, x: 20 },
+    show: { opacity: 1, x: 0, transition: { duration: 0.3 } },
+};
+
+export const scaleIn: Variants = {
+    hidden: { opacity: 0, scale: 0.95 },
+    show: { opacity: 1, scale: 1, transition: { duration: 0.3 } },
 };
