@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 import { ThemeProvider } from "@/hooks/theme-provider";
+import { ToastProvider } from "@/hooks/toast-provider";
 
 export const metadata: Metadata = {
     title: "Planora Hall",
@@ -22,6 +23,7 @@ export default function RootLayout({
                     enableSystem
                 >
                     {children}
+                    <ToastProvider />
                 </ThemeProvider>
             </body>
         </html>
