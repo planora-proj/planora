@@ -4,9 +4,10 @@
 */
 
 use actix_cors::Cors;
-use actix_web::{App, HttpServer, web};
+use actix_web::{App, HttpServer, middleware, web};
 
 use arx_gatehouse::services;
+
 mod config;
 mod middlewares;
 mod routes;
@@ -63,13 +64,14 @@ async fn main() -> std::io::Result<()> {
         };
 
         App::new()
+            .wrap(tracing_actix_web::TracingLogger::default())
+            .wrap(middleware::NormalizePath::trim())
             .wrap(cors)
             .wrap(middlewares::AuthMiddleware::new(
                 vec!["/v1/auth/signin", "/v1/auth/signup"],
                 jwt_service.clone(),
                 manager.clone(),
             ))
-            .wrap(tracing_actix_web::TracingLogger::default())
             .app_data(web::Data::new(manager.clone()))
             .app_data(web::Data::new(jwt_service.clone()))
             .route("/ws", web::get().to(ws::ws))
