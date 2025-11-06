@@ -2,7 +2,7 @@ use actix_web::{
     Error,
     dev::{Service, ServiceRequest, ServiceResponse, Transform, forward_ready},
     error::{ErrorInternalServerError, ErrorUnauthorized},
-    http::header::{HeaderName, HeaderValue},
+    http::header::HeaderValue,
 };
 use futures_util::future::{LocalBoxFuture, Ready, ok};
 use std::rc::Rc;
@@ -12,8 +12,7 @@ use crate::{
     services::{DbManager, JwtService},
 };
 
-const X_USER_ID_HEADER_KEY: &'static str = "x-user-id";
-const X_USER_ID_HEADER: HeaderName = HeaderName::from_static(X_USER_ID_HEADER_KEY);
+use arx_gatehouse::common::constants::X_USER_ID_HEADER;
 
 pub struct AuthMiddleware {
     public_paths: Rc<Vec<String>>,
