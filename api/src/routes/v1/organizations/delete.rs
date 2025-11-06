@@ -1,81 +1,42 @@
 use actix_web::{HttpRequest, HttpResponse, Responder, delete, web};
 
 use arx_gatehouse::{
-    common::{ApiError, ApiResult},
-    db::repos::{OrgRepo, UserRepo},
-    services::{DbManager, JwtService},
+    common::{
+        ApiError, ApiResult,
+        headers::{extract_org_id, extract_user_id},
+    },
+    db::repos::OrgRepo,
+    services::DbManager,
 };
 
-#[cfg_attr(test, derive(serde::Serialize))]
-#[derive(serde::Deserialize)]
-struct DeleteOrg {
-    pub org_id: Option<uuid::Uuid>,
-    pub subdomain: Option<String>,
-}
-
-#[delete("/")]
+#[delete("")]
 async fn delete_organization(
     manager: web::Data<DbManager>,
-    jwt_service: web::Data<JwtService>,
-    payload: web::Json<DeleteOrg>,
     req: HttpRequest,
 ) -> Result<impl Responder, ApiError> {
-    // TODO: extract this user authentication to a middleware
-    let token_cookie = if let Some(cookie) = req.cookie(JwtService::JWT_SESSION_KEY) {
-        cookie
-    } else {
-        return Ok(
-            HttpResponse::Unauthorized().json(ApiResult::<()>::error("authentication required"))
-        );
-    };
-    let pool = manager.get_pool("planora").await.unwrap();
-    let claims = jwt_service.verify_token(token_cookie.value())?;
-    let user_repo = UserRepo::new(&pool);
+    let user_id = extract_user_id(&req)?;
+    let org_id = extract_org_id(&req)?;
 
-    let user = if let Some(user) = user_repo.find_by_userid(claims.sub).await? {
-        user
-    } else {
-        return Ok(
-            HttpResponse::Unauthorized().json(ApiResult::<()>::error("authentication required"))
-        );
-    };
+    tracing::trace!(%user_id, %org_id, "delete organization");
 
+    let pool = manager.get_planora_pool().await?;
     let org_repo = OrgRepo::new(&pool);
-    let orgs = org_repo.find_by_ownerid(user.user_id).await?;
-    let org_ids = orgs.iter().map(|v| v.organization_id).collect::<Vec<_>>();
-    let org_subdomains = orgs.iter().map(|v| v.subdomain.clone()).collect::<Vec<_>>();
 
-    // checking the payload
-    let affected_row = match payload.0 {
-        DeleteOrg {
-            org_id: Some(org_id),
-            ..
-        } => {
-            if !org_ids.contains(&org_id) {
-                return Ok(HttpResponse::Unauthorized().json(ApiResult::<()>::error(
-                    "you don't have privilege to delete the organization",
-                )));
-            }
-
-            tracing::debug!("deleted the organization: {}", org_id);
-            org_repo.delete_by_orgid(org_id).await?
-        }
-        DeleteOrg {
-            subdomain: Some(subdomain),
-            ..
-        } => {
-            if !org_subdomains.contains(&subdomain) {
-                return Ok(HttpResponse::Unauthorized().json(ApiResult::<()>::error(
-                    "you don't have privilege to delete the organization",
-                )));
-            }
-            tracing::debug!("deleted the organization: {}", subdomain);
-            org_repo.delete_by_subdomain(subdomain).await?
+    match org_repo.find_by_orgid(org_id).await? {
+        Some(org) if org.owner_id == user_id => {
+            tracing::trace!(%user_id, %org_id, "organization has been found");
         }
         _ => {
-            return Ok(HttpResponse::BadRequest().json(ApiResult::<()>::error("invalid request")));
+            tracing::error!(%user_id, %org_id, "failed to retrieve organization for the user");
+            return Ok(HttpResponse::NotFound().json(ApiResult::<()>::error(
+                "organization is not found for the user",
+            )));
         }
     };
+
+    let affected_row = org_repo.delete_by_orgid(org_id).await?;
+
+    tracing::info!(%user_id, %org_id, %affected_row, "organization deleted");
 
     Ok(HttpResponse::Ok().json(ApiResult::<u64>::success(
         affected_row,
