@@ -1,28 +1,4 @@
-use actix_web::HttpRequest;
-
 use arx_gatehouse::{common::ApiError, db::repos::OrgRepo};
-
-pub async fn extract_org_id(req: &HttpRequest) -> Result<uuid::Uuid, ApiError> {
-    tracing::trace!("Extracting organization ID from request headers");
-
-    let header = req.headers().get("X-Organization-Id").ok_or_else(|| {
-        tracing::warn!("Missing X-Organization-Id header");
-        ApiError::BadRequest("Missing X-Organization-Id header".into())
-    })?;
-
-    let value = header.to_str().map_err(|_| {
-        tracing::warn!("Invalid X-Organization-Id header encoding");
-        ApiError::BadRequest("Invalid X-Organization-Id header encoding".into())
-    })?;
-
-    let org_id = uuid::Uuid::parse_str(value).map_err(|_| {
-        tracing::warn!(header = %value, "Invalid organization UUID format");
-        ApiError::BadRequest("Invalid organization UUID format".into())
-    })?;
-
-    tracing::trace!(%org_id, "Extracted organization ID");
-    Ok(org_id)
-}
 
 pub async fn validate_org(pool: &sqlx::PgPool, org_id: uuid::Uuid) -> Result<(), ApiError> {
     let repo = OrgRepo::new(pool);

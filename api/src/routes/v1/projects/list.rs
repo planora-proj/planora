@@ -1,20 +1,20 @@
 use actix_web::{HttpRequest, HttpResponse, Responder, get, web};
 
-use super::helper::{extract_org_id, validate_org};
+use super::helper::validate_org;
 use arx_gatehouse::{
-    common::{ApiError, ApiResult},
+    common::{ApiError, ApiResult, headers::extract_org_id},
     db::{models::Project, repos::ProjectRepo},
     services::DbManager,
 };
 
-#[get("/")]
+#[get("")]
 async fn list_projects(
     manager: web::Data<DbManager>,
     req: HttpRequest,
 ) -> Result<impl Responder, ApiError> {
-    let pool = manager.get_pool("planora").await.unwrap();
+    let pool = manager.get_planora_pool().await?;
 
-    let org_id = extract_org_id(&req).await?;
+    let org_id = extract_org_id(&req)?;
     validate_org(&pool, org_id).await?;
 
     tracing::trace!(%org_id, "Listing projects for organization");

@@ -1,9 +1,8 @@
 use actix_web::{HttpRequest, HttpResponse, Responder, post, web};
 
-use super::helper::{extract_org_id, validate_org};
-
+use super::helper::validate_org;
 use arx_gatehouse::{
-    common::{ApiError, ApiResult},
+    common::{ApiError, ApiResult, headers::extract_org_id},
     db::{models::Project, repos::ProjectRepo},
     services::DbManager,
 };
@@ -15,7 +14,7 @@ struct CreateProject {
     pub description: Option<String>,
 }
 
-#[post("/")]
+#[post("")]
 async fn create_project(
     manager: web::Data<DbManager>,
     payload: web::Json<CreateProject>,
@@ -24,12 +23,12 @@ async fn create_project(
     let name = payload.name.clone();
     let description = payload.description.clone();
 
-    let pool = manager.get_pool("planora").await.unwrap();
+    let pool = manager.get_planora_pool().await?;
 
-    let org_id = extract_org_id(&req).await?;
+    let org_id = extract_org_id(&req)?;
     validate_org(&pool, org_id).await?;
 
-    tracing::trace!(%name, %org_id, "Creating project for organization");
+    tracing::trace!(%name, %org_id, "create project for organization");
 
     let project_repo = ProjectRepo::new(&pool);
 
@@ -49,6 +48,6 @@ async fn create_project(
 
     Ok(HttpResponse::Ok().json(ApiResult::<Project>::success(
         inserted_project,
-        "project has been successfully created".to_string(),
+        "project has been created successfully".to_string(),
     )))
 }
