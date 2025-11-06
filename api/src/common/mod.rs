@@ -1,5 +1,6 @@
 pub mod constants;
 mod error;
+pub mod extractors;
 pub mod headers;
 mod response;
 pub mod time;
