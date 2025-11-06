@@ -1,8 +1,8 @@
 use actix_web::{HttpRequest, HttpResponse, Responder, delete, web};
 
-use crate::{
+use arx_gatehouse::{
+    common::{ApiError, ApiResult},
     db::repos::{OrgRepo, UserRepo},
-    routes::common::{ApiError, ApiResult},
     services::{DbManager, JwtService},
 };
 

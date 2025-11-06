@@ -1,9 +1,9 @@
 use actix_web::{HttpRequest, HttpResponse, Responder, delete, web};
 
 use super::helper::{extract_org_id, validate_org};
-use crate::{
+use arx_gatehouse::{
+    common::{ApiError, ApiResult},
     db::repos::ProjectRepo,
-    routes::common::{ApiError, ApiResult},
     services::DbManager,
 };
 

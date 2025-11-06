@@ -6,11 +6,10 @@
 use actix_cors::Cors;
 use actix_web::{App, HttpServer, web};
 
+use arx_gatehouse::services;
 mod config;
-mod db;
 mod middlewares;
 mod routes;
-pub mod services;
 mod telemetry;
 mod ws;
 

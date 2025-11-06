@@ -1,11 +1,11 @@
 use actix_web::{HttpRequest, HttpResponse, Responder, post, web};
 
-use crate::{
+use arx_gatehouse::{
+    common::{ApiError, ApiResult},
     db::{
         models::Organization,
         repos::{OrgRepo, UserRepo},
     },
-    routes::common::{ApiError, ApiResult},
     services::{DbManager, JwtService},
 };
 

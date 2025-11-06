@@ -4,8 +4,8 @@ use actix_web::{
     post, web,
 };
 
-use crate::{
-    routes::common::{ApiError, ApiResult},
+use arx_gatehouse::{
+    common::{ApiError, ApiResult},
     services::JwtService,
 };
 

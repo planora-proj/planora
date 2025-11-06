@@ -1,6 +1,6 @@
 use actix_web::HttpRequest;
 
-use crate::{db::repos::OrgRepo, routes::common::ApiError};
+use arx_gatehouse::{common::ApiError, db::repos::OrgRepo};
 
 pub async fn extract_org_id(req: &HttpRequest) -> Result<uuid::Uuid, ApiError> {
     tracing::trace!("Extracting organization ID from request headers");

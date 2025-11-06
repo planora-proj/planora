@@ -1,5 +1,4 @@
-#[cfg_attr(test, derive(serde::Deserialize))]
-#[derive(serde::Serialize)]
+#[derive(serde::Serialize, serde::Deserialize)]
 pub struct ApiResult<T> {
     pub success: bool,
     pub message: Option<String>,

@@ -1,6 +1,6 @@
 use actix_web::{HttpResponse, Responder, get};
 
-use crate::routes::common::{ApiResult, time};
+use arx_gatehouse::common::{ApiResult, time};
 
 #[cfg_attr(test, derive(serde::Deserialize))]
 #[derive(serde::Serialize)]

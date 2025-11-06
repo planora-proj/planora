@@ -1,8 +1,8 @@
 use actix_web::{HttpResponse, Responder, get, web};
 
-use crate::{
+use arx_gatehouse::{
+    common::{ApiError, ApiResult, PaginatedResult, PaginationQuery},
     db::repos::UserRepo,
-    routes::common::{ApiError, ApiResult, PaginatedResult, PaginationQuery},
     services::DbManager,
 };
 

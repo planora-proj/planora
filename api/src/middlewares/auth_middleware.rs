@@ -7,12 +7,11 @@ use actix_web::{
 use futures_util::future::{LocalBoxFuture, Ready, ok};
 use std::rc::Rc;
 
-use crate::{
+use arx_gatehouse::{
+    common::constants::X_USER_ID_HEADER,
     db::repos::UserRepo,
     services::{DbManager, JwtService},
 };
-
-use arx_gatehouse::common::constants::X_USER_ID_HEADER;
 
 pub struct AuthMiddleware {
     public_paths: Rc<Vec<String>>,

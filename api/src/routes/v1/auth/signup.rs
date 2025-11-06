@@ -4,9 +4,9 @@ use actix_web::{
     post, web,
 };
 
-use crate::{
+use arx_gatehouse::{
+    common::{ApiError, ApiResult},
     db::{models::User, repos::UserRepo},
-    routes::common::{ApiError, ApiResult},
     services::{DbManager, JwtService},
 };
 
