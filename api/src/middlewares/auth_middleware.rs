@@ -85,13 +85,10 @@ where
 
             tracing::debug!(%path, "checking authentication");
 
-            let pool = match manager.get_pool("planora").await {
-                Some(pool) => pool,
-                None => {
-                    tracing::error!("failed to get database pool");
-                    return Err(ErrorInternalServerError("internal error"));
-                }
-            };
+            let pool = manager.get_planora_pool().await.map_err(|err| {
+                tracing::error!(%err);
+                ErrorInternalServerError("Internal error")
+            })?;
 
             // Extract token cookie
             let token_cookie = req
