@@ -27,7 +27,7 @@ pub fn extract_user_id(req: &HttpRequest) -> Result<uuid::Uuid, ApiError> {
     Ok(user_id)
 }
 
-pub async fn extract_org_id(req: &HttpRequest) -> Result<uuid::Uuid, ApiError> {
+pub fn extract_org_id(req: &HttpRequest) -> Result<uuid::Uuid, ApiError> {
     tracing::trace!("Extracting organization ID from request headers");
 
     let header = req.headers().get(X_ORG_ID_HEADER).ok_or_else(|| {
