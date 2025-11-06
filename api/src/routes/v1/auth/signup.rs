@@ -28,21 +28,22 @@ async fn signup(
     let email = payload.email.clone();
     let password = payload.password.clone();
 
-    let pool = manager.get_pool("planora").await.unwrap();
+    tracing::trace!(%email, "signing up");
 
-    // verify is any other user with the same email
+    let pool = manager.get_planora_pool().await?;
+
     let user_repo = UserRepo::new(&pool);
-    let u = user_repo
-        .find_by_email(email.clone())
-        .await
-        .map_err(ApiError::from)?;
+    match user_repo.find_by_email(email.clone()).await? {
+        Some(_) => {
+            tracing::error!(%email, "email is already registered");
+            return Ok(HttpResponse::Conflict()
+                .json(ApiResult::<()>::error("email is already registered")));
+        }
+        _ => {}
+    };
 
-    if u.is_some() {
-        return Ok(HttpResponse::NotAcceptable()
-            .json(ApiResult::<()>::error("email is already registered")));
-    }
+    tracing::trace!(%email, "creating a user");
 
-    // create user
     let inserted_user = user_repo
         .create_user(&User {
             username,
@@ -50,11 +51,11 @@ async fn signup(
             password: Some(password),
             ..Default::default()
         })
-        .await
-        .map_err(ApiError::from)?;
-    tracing::info!("user has been created: {email}");
+        .await?;
 
-    // session creation
+    tracing::info!(%email, "user has been created successfuly");
+
+    tracing::trace!(%email, "generating session token");
     let (access_token, _refresh_token) = jwt_service.generate_tokens(inserted_user.user_id)?;
 
     let cookie = Cookie::build(JwtService::JWT_SESSION_KEY, access_token)
@@ -63,6 +64,8 @@ async fn signup(
         .http_only(true)
         .same_site(SameSite::None)
         .finish();
+
+    tracing::info!("user has been signed up successfully: {email}");
 
     Ok(HttpResponse::Ok()
         .cookie(cookie)

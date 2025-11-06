@@ -1,29 +1,18 @@
 use actix_web::{
     HttpRequest, HttpResponse, Responder,
     cookie::{Cookie, time},
-    post, web,
+    post,
 };
 
 use arx_gatehouse::{
-    common::{ApiError, ApiResult},
+    common::{ApiError, ApiResult, headers::extract_user_id},
     services::JwtService,
 };
 
 #[post("/signout")]
-async fn signout(
-    req: HttpRequest,
-    jwt_service: web::Data<JwtService>,
-) -> Result<impl Responder, ApiError> {
-    let token_cookie = if let Some(cookie) = req.cookie(JwtService::JWT_SESSION_KEY) {
-        cookie
-    } else {
-        return Ok(
-            HttpResponse::Unauthorized().json(ApiResult::<()>::error("user is not authenticated"))
-        );
-    };
-
-    // verify the token
-    jwt_service.verify_token(token_cookie.value())?;
+async fn signout(req: HttpRequest) -> Result<impl Responder, ApiError> {
+    let user_id = extract_user_id(&req)?;
+    tracing::trace!(%user_id, "signing out");
 
     let expired_cookie = Cookie::build(JwtService::JWT_SESSION_KEY, "")
         .path("/")
@@ -32,14 +21,16 @@ async fn signout(
         .max_age(time::Duration::seconds(-1))
         .finish();
 
+    tracing::info!(%user_id, "signed out successfully");
+
     Ok(HttpResponse::Ok()
         .cookie(expired_cookie)
-        .json(ApiResult::<()>::success_message("logged out successfully")))
+        .json(ApiResult::<()>::success_message("signed out successfully")))
 }
 
 #[cfg(test)]
 mod tests {
-    use actix_web::{App, test};
+    use actix_web::{App, test, web};
 
     use super::*;
 

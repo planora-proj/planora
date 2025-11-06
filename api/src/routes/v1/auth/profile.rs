@@ -1,9 +1,9 @@
 use actix_web::{HttpRequest, HttpResponse, Responder, get, web};
 
 use arx_gatehouse::{
-    common::{ApiError, ApiResult},
+    common::{ApiError, ApiResult, headers::extract_user_id},
     db::repos::UserRepo,
-    services::{DbManager, JwtService},
+    services::DbManager,
 };
 
 #[derive(serde::Serialize)]
@@ -16,34 +16,32 @@ struct SafeUser {
 #[get("/profile")]
 async fn profile(
     manager: web::Data<DbManager>,
-    jwt_service: web::Data<JwtService>,
     req: HttpRequest,
 ) -> Result<impl Responder, ApiError> {
-    // extract the session token
-    let token_cookie = if let Some(cookie) = req.cookie(JwtService::JWT_SESSION_KEY) {
-        cookie
-    } else {
-        return Ok(
-            HttpResponse::Unauthorized().json(ApiResult::<()>::error("authentication required"))
-        );
-    };
+    let user_id = extract_user_id(&req)?;
+    tracing::trace!(%user_id, "request for profile data");
 
-    let pool = manager.get_pool("planora").await.unwrap();
-    let claims = jwt_service.verify_token(token_cookie.value())?;
-
+    let pool = manager.get_planora_pool().await?;
     let user_repo = UserRepo::new(&pool);
-    let safe_user = if let Some(user) = user_repo.find_by_userid(claims.sub).await? {
-        tracing::info!(user = ?user);
-        SafeUser {
-            user_tag: user.user_tag,
-            username: user.username,
-            email: user.email,
+
+    let user = match user_repo.find_by_userid(user_id).await? {
+        Some(user) => {
+            tracing::trace!(%user_id, "user has been found");
+            user
         }
-    } else {
-        return Ok(
-            HttpResponse::NotFound().json(ApiResult::<()>::success_message("user is not found"))
-        );
+        None => {
+            tracing::error!(%user_id, "failed to retrieve user");
+            return Ok(HttpResponse::NotFound().json(ApiResult::<()>::error("user is not found")));
+        }
     };
+
+    let safe_user = SafeUser {
+        user_tag: user.user_tag,
+        username: user.username,
+        email: user.email,
+    };
+
+    tracing::info!(%user_id, "sending profile data");
 
     Ok(HttpResponse::Ok().json(ApiResult::<SafeUser>::success(
         safe_user,
