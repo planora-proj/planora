@@ -8,6 +8,7 @@ use actix_web::{App, HttpServer, web};
 
 mod config;
 mod db;
+mod middlewares;
 mod routes;
 pub mod services;
 mod telemetry;
@@ -64,6 +65,11 @@ async fn main() -> std::io::Result<()> {
 
         App::new()
             .wrap(cors)
+            .wrap(middlewares::AuthMiddleware::new(
+                vec!["/v1/auth/signin", "/v1/auth/signup"],
+                jwt_service.clone(),
+                manager.clone(),
+            ))
             .wrap(tracing_actix_web::TracingLogger::default())
             .app_data(web::Data::new(manager.clone()))
             .app_data(web::Data::new(jwt_service.clone()))
