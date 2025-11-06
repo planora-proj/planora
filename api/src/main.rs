@@ -15,13 +15,20 @@ mod ws;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    // telemetry
+    telemetry::init();
+
     // config
     let config = config::Config::from_env();
     let is_production_env = config.is_production_env();
-    let web_url = config.next_base_url.clone();
-
-    // telemetry
-    telemetry::init();
+    let web_url = config.next_base_url.to_owned();
+    tracing::info!(
+        "\n\t\t{} v{} initialized - running in {} ({}) mode",
+        config.app_name,
+        config.app_version,
+        config.app_env,
+        config.profile
+    );
 
     /* services */
     // database
