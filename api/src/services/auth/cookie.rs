@@ -1,0 +1,40 @@
+use actix_web::cookie::{Cookie, SameSite, time};
+
+use super::constants::{JWT_ACCESS_TOKEN_KEY, JWT_REFRESH_TOKEN_KEY};
+
+pub fn build_cookie(is_access_token: bool, token: String) -> Cookie<'static> {
+    let key = if is_access_token {
+        JWT_ACCESS_TOKEN_KEY
+    } else {
+        JWT_REFRESH_TOKEN_KEY
+    };
+
+    let cookie = Cookie::build(key, token)
+        .path("/")
+        .secure(false)
+        .http_only(true)
+        .same_site(SameSite::None)
+        .finish();
+
+    return cookie;
+}
+
+pub fn expire_cookie() -> (Cookie<'static>, Cookie<'static>) {
+    // Expire both access and refresh token
+    return (
+        expire_cookie_cn(JWT_ACCESS_TOKEN_KEY),
+        expire_cookie_cn(JWT_REFRESH_TOKEN_KEY),
+    );
+}
+
+#[inline]
+fn expire_cookie_cn(key: &'static str) -> Cookie<'static> {
+    let expire_cookie = Cookie::build(key, "")
+        .path("/")
+        .secure(false)
+        .http_only(true)
+        .max_age(time::Duration::seconds(-1))
+        .finish();
+
+    return expire_cookie;
+}
