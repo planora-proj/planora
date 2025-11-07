@@ -1,14 +1,13 @@
 use actix_web::{
     Error,
     dev::{Service, ServiceRequest, ServiceResponse, Transform, forward_ready},
-    error::{ErrorInternalServerError, ErrorUnauthorized},
     http::header::HeaderValue,
 };
 use futures_util::future::{LocalBoxFuture, Ready, ok};
 use std::rc::Rc;
 
 use arx_gatehouse::{
-    common::{constants::X_USER_ID_HEADER, cookie::extract_access_token},
+    common::{ApiError, constants::X_USER_ID_HEADER, cookie::extract_access_token},
     db::repos::UserRepo,
     services::{AuthService, DbManager},
 };
@@ -85,10 +84,7 @@ where
 
             tracing::debug!(%path, "checking authentication");
 
-            let pool = manager.get_planora_pool().await.map_err(|err| {
-                tracing::error!(%err);
-                ErrorInternalServerError("Internal error")
-            })?;
+            let pool = manager.get_planora_pool().await?;
 
             // Extract token cookie
             let token = extract_access_token(&req)?;
@@ -96,19 +92,19 @@ where
             // Verify token
             let user_id = auth_service
                 .jwt_verify_access_token(&token)
-                .map_err(|_| ErrorUnauthorized("Invalid or expired token"))?;
+                .map_err(ApiError::from)?;
 
             let user_repo = UserRepo::new(&pool);
             let user = user_repo
                 .find_by_userid(user_id)
                 .await
-                .map_err(|_| ErrorUnauthorized("User lookup failed"))?
-                .ok_or_else(|| ErrorUnauthorized("User not found"))?;
+                .map_err(|_| ApiError::Unauthorized("unauthorized".to_string()))?
+                .ok_or_else(|| ApiError::Unauthorized("unauthorized".to_string()))?;
 
             let user_id_header_val = HeaderValue::from_str(user.user_id.to_string().as_str())
                 .map_err(|err| {
                     tracing::error!(%err, "parsing into HeaderValue failed");
-                    ErrorInternalServerError("Internal error")
+                    ApiError::Internal("internal error".to_string())
                 })?;
 
             req.headers_mut()
