@@ -3,7 +3,7 @@ use actix_web::{HttpResponse, Responder, post, web};
 use arx_gatehouse::{
     common::{ApiError, ApiResult},
     db::repos::UserRepo,
-    services::{DbManager, JwtService, auth::cookie::build_cookie},
+    services::{AuthService, DbManager, auth::cookie::build_cookie},
 };
 
 #[cfg_attr(test, derive(serde::Serialize))]
@@ -16,7 +16,7 @@ struct SigninPayload {
 #[post("/signin")]
 async fn signin(
     manager: web::Data<DbManager>,
-    jwt_service: web::Data<JwtService>,
+    auth_service: web::Data<AuthService>,
     payload: web::Json<SigninPayload>,
 ) -> Result<impl Responder, ApiError> {
     let email = payload.email.clone();
@@ -50,7 +50,7 @@ async fn signin(
     tracing::trace!(%email, "valid user credentials");
 
     tracing::trace!(%email, "generate session token");
-    let (access_token, refresh_token) = jwt_service.generate_tokens(user.user_id)?;
+    let (access_token, refresh_token) = auth_service.jwt_generate_token(user.user_id)?;
     let (access_token_cookie, refresh_token_cookie) = build_cookie(access_token, refresh_token);
 
     tracing::info!(%email, "signed in successfully");

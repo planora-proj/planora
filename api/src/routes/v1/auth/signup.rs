@@ -3,7 +3,7 @@ use actix_web::{HttpResponse, Responder, post, web};
 use arx_gatehouse::{
     common::{ApiError, ApiResult},
     db::{models::User, repos::UserRepo},
-    services::{DbManager, JwtService, auth::cookie::build_cookie},
+    services::{AuthService, DbManager, auth::cookie::build_cookie},
 };
 
 #[cfg_attr(test, derive(serde::Serialize))]
@@ -17,7 +17,7 @@ struct SignupPayload {
 #[post("/signup")]
 async fn signup(
     manager: web::Data<DbManager>,
-    jwt_service: web::Data<JwtService>,
+    auth_service: web::Data<AuthService>,
     payload: web::Json<SignupPayload>,
 ) -> Result<impl Responder, ApiError> {
     let username = payload.username.clone();
@@ -52,7 +52,7 @@ async fn signup(
     tracing::info!(%email, "user created successfuly");
 
     tracing::trace!(%email, "generate session token");
-    let (access_token, refresh_token) = jwt_service.generate_tokens(inserted_user.user_id)?;
+    let (access_token, refresh_token) = auth_service.jwt_generate_token(inserted_user.user_id)?;
     let (access_token_cookie, refresh_token_cookie) = build_cookie(access_token, refresh_token);
 
     tracing::info!(%email, "signed up successfully");

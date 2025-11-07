@@ -10,20 +10,20 @@ use std::rc::Rc;
 use arx_gatehouse::{
     common::{constants::X_USER_ID_HEADER, cookie::extract_access_token},
     db::repos::UserRepo,
-    services::{DbManager, JwtService},
+    services::{AuthService, DbManager},
 };
 
 pub struct AuthMiddleware {
     public_paths: Rc<Vec<String>>,
-    jwt_service: Rc<JwtService>,
+    auth_service: Rc<AuthService>,
     manager: Rc<DbManager>,
 }
 
 impl AuthMiddleware {
-    pub fn new(public_paths: Vec<&str>, jwt_service: JwtService, manager: DbManager) -> Self {
+    pub fn new(public_paths: Vec<&str>, auth_service: AuthService, manager: DbManager) -> Self {
         Self {
             public_paths: Rc::new(public_paths.into_iter().map(String::from).collect()),
-            jwt_service: Rc::new(jwt_service),
+            auth_service: Rc::new(auth_service),
             manager: Rc::new(manager),
         }
     }
@@ -44,7 +44,7 @@ where
         ok(AuthMiddlewareService {
             service: Rc::new(service),
             public_paths: Rc::clone(&self.public_paths),
-            jwt_service: Rc::clone(&self.jwt_service),
+            auth_service: Rc::clone(&self.auth_service),
             manager: Rc::clone(&self.manager),
         })
     }
@@ -53,7 +53,7 @@ where
 pub struct AuthMiddlewareService<S> {
     service: Rc<S>,
     public_paths: Rc<Vec<String>>,
-    jwt_service: Rc<JwtService>,
+    auth_service: Rc<AuthService>,
     manager: Rc<DbManager>,
 }
 
@@ -73,7 +73,7 @@ where
         let public_paths = Rc::clone(&self.public_paths);
         let service = Rc::clone(&self.service);
         let manager = Rc::clone(&self.manager);
-        let jwt_service = Rc::clone(&self.jwt_service);
+        let auth_service = Rc::clone(&self.auth_service);
 
         Box::pin(async move {
             tracing::trace!(%path, "incoming request path");
@@ -94,13 +94,13 @@ where
             let token = extract_access_token(&req)?;
 
             // Verify token
-            let claims = jwt_service
-                .verify_token(&token)
+            let user_id = auth_service
+                .jwt_verify_access_token(&token)
                 .map_err(|_| ErrorUnauthorized("Invalid or expired token"))?;
 
             let user_repo = UserRepo::new(&pool);
             let user = user_repo
-                .find_by_userid(claims.sub)
+                .find_by_userid(user_id)
                 .await
                 .map_err(|_| ErrorUnauthorized("User lookup failed"))?
                 .ok_or_else(|| ErrorUnauthorized("User not found"))?;

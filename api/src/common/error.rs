@@ -1,6 +1,7 @@
 use actix_web::{HttpResponse, ResponseError};
 
 use super::ApiResult;
+use crate::services::auth::AuthError;
 
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
@@ -8,8 +9,8 @@ pub enum ApiError {
     #[error("Database connection failed: {0}")]
     DatabaseError(#[from] sqlx::Error),
 
-    #[error("jwt service failed")]
-    JwtError(#[from] jsonwebtoken::errors::Error),
+    #[error("Authentication failed")]
+    AuthError(#[from] AuthError),
 
     #[error("Header value to string conversion error: {0}")]
     ToStrError(#[from] actix_web::http::header::ToStrError),
@@ -34,7 +35,7 @@ impl ResponseError for ApiError {
                 HttpResponse::InternalServerError()
                     .json(ApiResult::<()>::error("Internal server error"))
             }
-            JwtError(err) => {
+            AuthError(err) => {
                 tracing::error!(error = %err);
                 HttpResponse::InternalServerError()
                     .json(ApiResult::<()>::error("Internal server error"))

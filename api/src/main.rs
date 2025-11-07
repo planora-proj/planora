@@ -39,8 +39,8 @@ async fn main() -> std::io::Result<()> {
         .await
         .expect("Failed to connect to Postgres");
 
-    // jwt
-    let jwt_service = services::JwtService::from_env();
+    // auth
+    let auth_service = services::AuthService::from_env();
 
     // actix server
     tracing::info!("Starting server at http://{}", config.addr());
@@ -69,11 +69,11 @@ async fn main() -> std::io::Result<()> {
             .wrap(cors)
             .wrap(middlewares::AuthMiddleware::new(
                 vec!["/v1/auth/signin", "/v1/auth/signup"],
-                jwt_service.clone(),
+                auth_service.clone(),
                 manager.clone(),
             ))
             .app_data(web::Data::new(manager.clone()))
-            .app_data(web::Data::new(jwt_service.clone()))
+            .app_data(web::Data::new(auth_service.clone()))
             .route("/ws", web::get().to(ws::ws))
             .service(routes::v1::v1_scope())
             .service(routes::internal::internal_routes())
