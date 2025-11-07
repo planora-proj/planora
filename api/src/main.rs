@@ -14,6 +14,10 @@ mod routes;
 mod telemetry;
 mod ws;
 
+pub const fn public_paths() -> [&'static str; 3] {
+    ["/v1/auth/signin", "/v1/auth/signup", "/v1/health"]
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     // telemetry
@@ -68,7 +72,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(middleware::NormalizePath::trim())
             .wrap(cors)
             .wrap(middlewares::AuthMiddleware::new(
-                vec!["/v1/auth/signin", "/v1/auth/signup"],
+                public_paths().into(),
                 auth_service.clone(),
                 manager.clone(),
             ))
