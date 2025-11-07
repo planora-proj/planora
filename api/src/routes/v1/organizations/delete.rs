@@ -1,4 +1,4 @@
-use actix_web::{HttpRequest, HttpResponse, Responder, delete, web};
+use actix_web::{HttpRequest, Responder, delete, web};
 
 use arx_gatehouse::{
     common::{
@@ -28,9 +28,7 @@ async fn delete_organization(
         }
         _ => {
             tracing::error!(%user_id, %org_id, "failed to retrieve organization for the user");
-            return Ok(HttpResponse::NotFound().json(ApiResult::<()>::error(
-                "organization is not found for the user",
-            )));
+            return ApiResult::to_not_found("organization is not found for the user");
         }
     };
 
@@ -38,8 +36,5 @@ async fn delete_organization(
 
     tracing::info!(%user_id, %org_id, %affected_row, "organization deleted");
 
-    Ok(HttpResponse::Ok().json(ApiResult::<u64>::success(
-        affected_row,
-        Some("organization has been deleted".to_string()),
-    )))
+    ApiResult::to_ok_response("organization has been deleted", affected_row)
 }

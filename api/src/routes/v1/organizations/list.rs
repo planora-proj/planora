@@ -1,8 +1,8 @@
-use actix_web::{HttpRequest, HttpResponse, Responder, get, web};
+use actix_web::{HttpRequest, Responder, get, web};
 
 use arx_gatehouse::{
     common::{ApiError, ApiResult, headers::extract_user_id},
-    db::{models::Organization, repos::OrgRepo},
+    db::repos::OrgRepo,
     services::DbManager,
 };
 
@@ -22,10 +22,5 @@ async fn list_organizations(
 
     tracing::info!(%user_id, len = %orgs.len(), "listed organization");
 
-    Ok(
-        HttpResponse::Ok().json(ApiResult::<Vec<Organization>>::success(
-            orgs,
-            Some("organization list".to_string()),
-        )),
-    )
+    ApiResult::to_ok_response("organization list", orgs)
 }

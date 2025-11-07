@@ -1,4 +1,4 @@
-use actix_web::{HttpRequest, HttpResponse, Responder, get, web};
+use actix_web::{HttpRequest, Responder, get, web};
 
 use arx_gatehouse::{
     common::{ApiError, ApiResult, headers::extract_user_id},
@@ -31,7 +31,7 @@ async fn profile(
         }
         None => {
             tracing::error!(%user_id, "failed to retrieve user");
-            return Ok(HttpResponse::NotFound().json(ApiResult::<()>::error("user is not found")));
+            return ApiResult::to_not_found("user is not found");
         }
     };
 
@@ -43,8 +43,5 @@ async fn profile(
 
     tracing::info!(%user_id, "sending profile data");
 
-    Ok(HttpResponse::Ok().json(ApiResult::<SafeUser>::success(
-        safe_user,
-        "profile data".to_string(),
-    )))
+    ApiResult::to_ok_response("profile data", safe_user)
 }

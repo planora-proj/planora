@@ -32,8 +32,9 @@ async fn signup(
     match user_repo.find_by_email(email.clone()).await? {
         Some(_) => {
             tracing::error!(%email, "email is already registered");
-            return Ok(HttpResponse::Conflict()
-                .json(ApiResult::<()>::error("email is already registered")));
+            return Ok(
+                HttpResponse::Conflict().json(ApiResult::error("email is already registered"))
+            );
         }
         _ => {}
     };
@@ -60,5 +61,5 @@ async fn signup(
     Ok(HttpResponse::Ok()
         .cookie(access_token_cookie)
         .cookie(refresh_token_cookie)
-        .json(ApiResult::<()>::success_message("signed up successfully")))
+        .json(ApiResult::ok("signed up successfully")))
 }

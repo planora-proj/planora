@@ -34,17 +34,12 @@ async fn signin(
         }
         None => {
             tracing::error!(%email, "invalid email");
-            return Ok(HttpResponse::NotFound().json(ApiResult::<()>::error("invalid email")));
+            return ApiResult::to_not_found("invalid email");
         }
     };
-
     match user.password {
         Some(pass) if pass == password => {}
-        _ => {
-            return Ok(
-                HttpResponse::Unauthorized().json(ApiResult::<()>::error("invalid credentials"))
-            );
-        }
+        _ => return ApiResult::to_unauthorized("invalid credentials"),
     }
 
     tracing::trace!(%email, "valid user credentials");
@@ -58,5 +53,5 @@ async fn signin(
     Ok(HttpResponse::Ok()
         .cookie(access_token_cookie)
         .cookie(refresh_token_cookie)
-        .json(ApiResult::<()>::success_message("signed in successfully")))
+        .json(ApiResult::ok("signed in successfully")))
 }

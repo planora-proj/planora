@@ -1,9 +1,9 @@
-use actix_web::{HttpRequest, HttpResponse, Responder, get, web};
+use actix_web::{HttpRequest, Responder, get, web};
 
 use super::helper::validate_org;
 use arx_gatehouse::{
     common::{ApiError, ApiResult, headers::extract_org_id},
-    db::{models::Project, repos::ProjectRepo},
+    db::repos::ProjectRepo,
     services::DbManager,
 };
 
@@ -24,8 +24,9 @@ async fn list_projects(
 
     tracing::info!(%org_id, len = projects.len(), "Projects listed successfully");
 
-    Ok(HttpResponse::Ok().json(ApiResult::<Vec<Project>>::success(
-        projects,
-        "projects".to_string(),
-    )))
+    if projects.len() == 0 {
+        return ApiResult::to_no_content("No projects");
+    } else {
+        return ApiResult::to_ok_response("projects", projects);
+    }
 }

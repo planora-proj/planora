@@ -1,4 +1,4 @@
-use actix_web::{HttpRequest, HttpResponse, Responder, delete, web};
+use actix_web::{HttpRequest, Responder, delete, web};
 
 use super::helper::validate_org;
 use arx_gatehouse::{
@@ -39,15 +39,10 @@ async fn delete_project(
 
     if affected_rows == 0 {
         tracing::warn!(%project_id, %org_id, "No project found to delete");
-        return Ok(
-            HttpResponse::NotFound().json(ApiResult::<()>::error("Project not found".to_string()))
-        );
+        return ApiResult::to_not_found("Project not found");
     }
 
     tracing::info!(%project_id, %org_id, %affected_rows, "Project deleted successfully");
 
-    Ok(HttpResponse::Ok().json(ApiResult::<u64>::success(
-        affected_rows,
-        "Project has been deleted successfully".to_string(),
-    )))
+    ApiResult::to_ok_response("Project has been deleted successfully", affected_rows)
 }

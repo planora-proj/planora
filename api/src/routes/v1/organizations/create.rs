@@ -1,4 +1,4 @@
-use actix_web::{HttpRequest, HttpResponse, Responder, post, web};
+use actix_web::{HttpRequest, Responder, post, web};
 
 use arx_gatehouse::{
     common::{ApiError, ApiResult, headers::extract_user_id},
@@ -40,8 +40,5 @@ async fn create_organization(
 
     tracing::info!(%user_id, "created organization");
 
-    Ok(HttpResponse::Ok().json(ApiResult::<Organization>::success(
-        inserted_org,
-        Some("organization has been created".to_string()),
-    )))
+    ApiResult::to_ok_response("organization has been created", inserted_org)
 }

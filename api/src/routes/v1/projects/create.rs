@@ -1,4 +1,4 @@
-use actix_web::{HttpRequest, HttpResponse, Responder, post, web};
+use actix_web::{HttpRequest, Responder, post, web};
 
 use super::helper::validate_org;
 use arx_gatehouse::{
@@ -46,8 +46,5 @@ async fn create_project(
 
     tracing::info!(%inserted_project.project_id, %org_id, "Project created successfully");
 
-    Ok(HttpResponse::Ok().json(ApiResult::<Project>::success(
-        inserted_project,
-        "project has been created successfully".to_string(),
-    )))
+    ApiResult::to_ok_response("project has been created successfully", inserted_project)
 }

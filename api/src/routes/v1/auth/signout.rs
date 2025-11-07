@@ -17,7 +17,7 @@ async fn signout(req: HttpRequest) -> Result<impl Responder, ApiError> {
     Ok(HttpResponse::Ok()
         .cookie(access_token_cookie)
         .cookie(refresh_token_cookie)
-        .json(ApiResult::<()>::success_message("signed out successfully")))
+        .json(ApiResult::ok("signed out successfully")))
 }
 
 /*

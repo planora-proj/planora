@@ -1,4 +1,4 @@
-use actix_web::{HttpResponse, Responder, get};
+use actix_web::{Responder, get};
 
 use arx_gatehouse::common::{ApiResult, time};
 
@@ -16,7 +16,7 @@ async fn health_check() -> impl Responder {
         version: env!("CARGO_PKG_VERSION").to_string(),
     };
 
-    HttpResponse::Ok().json(ApiResult::success(info, Some("ok".to_string())))
+    ApiResult::to_ok_response("ok", info)
 }
 
 #[cfg(test)]
@@ -50,7 +50,7 @@ mod tests {
 
         let body: ApiResult<HealthInfo> = test::read_body_json(resp).await;
         assert!(body.success, "Expected success=true");
-        assert_eq!(body.message.unwrap_or_default(), "ok");
+        assert_eq!(body.message, "ok");
         assert!(
             body.payload.is_some(),
             "Expected payload with timestamp and version"

@@ -23,17 +23,13 @@ async fn get_users(
     secret: web::Query<Payload>,
 ) -> Result<impl Responder, ApiError> {
     if secret.secret.as_deref() != Some(SECRET_KEY) {
-        return Ok(HttpResponse::Unauthorized().json(ApiResult::<()>::error(
-            "not authorized to perform this action",
-        )));
+        return ApiResult::to_unauthorized("not authorized to perform this action");
     }
     let pool = manager.get_pool("planora").await.unwrap();
 
     let per_page = payload.per_page.unwrap_or(DEFAULT_PER_PAGE);
     if per_page < MIN_DEFAULT_PER_PAGE || per_page > MAX_DEFAULT_PER_PAGE {
-        return Ok(HttpResponse::BadRequest().json(ApiResult::<()>::error(
-            "per_page parameter is out of bounds",
-        )));
+        return ApiResult::to_bad_request("per_page parameter is out of bounds");
     }
 
     let offset = payload
