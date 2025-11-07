@@ -1,12 +1,17 @@
+use actix_web::HttpResponse;
+
+use super::ApiResponse;
+
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct ApiResult<T> {
     pub success: bool,
-    pub message: Option<String>,
+    pub message: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub payload: Option<T>,
 }
 
 impl<T> ApiResult<T> {
-    pub fn success(payload: T, message: impl Into<Option<String>>) -> Self {
+    pub fn success<M: Into<String>>(message: M, payload: T) -> Self {
         Self {
             success: true,
             message: message.into(),
@@ -14,20 +19,57 @@ impl<T> ApiResult<T> {
         }
     }
 
-    pub fn success_message(message: impl Into<String>) -> Self {
-        Self {
+    pub fn to_ok_response(message: impl Into<String>, payload: T) -> ApiResponse
+    where
+        T: serde::Serialize,
+    {
+        Ok(HttpResponse::Ok().json(Self::success(message, payload)))
+    }
+
+    pub fn to_created_response(message: impl Into<String>, payload: T) -> ApiResponse
+    where
+        T: serde::Serialize,
+    {
+        Ok(HttpResponse::Created().json(Self::success(message, payload)))
+    }
+}
+
+impl ApiResult<()> {
+    pub fn ok<M: Into<String>>(message: M) -> Self {
+        ApiResult {
             success: true,
-            message: Some(message.into()),
+            message: message.into(),
             payload: None,
         }
     }
 
-    pub fn error(message: impl Into<String>) -> Self {
-        Self {
+    pub fn error<M: Into<String>>(message: M) -> ApiResult<()> {
+        ApiResult {
             success: false,
-            message: Some(message.into()),
+            message: message.into(),
             payload: None,
         }
+    }
+
+    pub fn to_no_content(message: impl Into<String>) -> ApiResponse {
+        let res = Self::ok(message);
+        Ok(HttpResponse::NoContent().json(res))
+    }
+
+    pub fn to_bad_request(message: impl Into<String>) -> ApiResponse {
+        Ok(HttpResponse::BadRequest().json(Self::error(message)))
+    }
+
+    pub fn to_unauthorized(message: impl Into<String>) -> ApiResponse {
+        Ok(HttpResponse::Unauthorized().json(Self::error(message)))
+    }
+
+    pub fn to_not_found(message: impl Into<String>) -> ApiResponse {
+        Ok(HttpResponse::NotFound().json(Self::error(message)))
+    }
+
+    pub fn to_internal_error(message: impl Into<String>) -> ApiResponse {
+        Ok(HttpResponse::InternalServerError().json(Self::error(message)))
     }
 }
 
