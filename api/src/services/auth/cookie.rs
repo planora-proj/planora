@@ -12,7 +12,7 @@ pub fn build_cookie(
     )
 }
 
-fn build_cookie_cn(is_access_token: bool, token: String) -> Cookie<'static> {
+pub fn build_cookie_cn(is_access_token: bool, token: String) -> Cookie<'static> {
     let key = if is_access_token {
         JWT_ACCESS_TOKEN_KEY
     } else {

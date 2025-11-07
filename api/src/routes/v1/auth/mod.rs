@@ -1,6 +1,7 @@
 use actix_web::Scope;
 
 mod profile;
+mod refresh;
 mod signin;
 mod signout;
 mod signup;
@@ -10,5 +11,6 @@ pub fn auth_scope() -> Scope {
         .service(signup::signup)
         .service(signin::signin)
         .service(signout::signout)
+        .service(refresh::refresh)
         .service(profile::profile)
 }

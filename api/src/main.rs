@@ -16,8 +16,13 @@ mod routes;
 mod telemetry;
 mod ws;
 
-pub const fn public_paths() -> [&'static str; 3] {
-    ["/v1/auth/signin", "/v1/auth/signup", "/v1/health"]
+pub const fn public_paths() -> [&'static str; 4] {
+    [
+        "/v1/auth/signin",
+        "/v1/auth/signup",
+        "/v1/auth/refresh",
+        "/v1/health",
+    ]
 }
 
 async fn not_found_handler() -> HttpResponse {
