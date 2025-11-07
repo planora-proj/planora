@@ -2,7 +2,17 @@ use actix_web::cookie::{Cookie, SameSite, time};
 
 use super::constants::{JWT_ACCESS_TOKEN_KEY, JWT_REFRESH_TOKEN_KEY};
 
-pub fn build_cookie(is_access_token: bool, token: String) -> Cookie<'static> {
+pub fn build_cookie(
+    access_token: String,
+    refresh_token: String,
+) -> (Cookie<'static>, Cookie<'static>) {
+    (
+        build_cookie_cn(true, access_token),
+        build_cookie_cn(false, refresh_token),
+    )
+}
+
+fn build_cookie_cn(is_access_token: bool, token: String) -> Cookie<'static> {
     let key = if is_access_token {
         JWT_ACCESS_TOKEN_KEY
     } else {
@@ -21,10 +31,10 @@ pub fn build_cookie(is_access_token: bool, token: String) -> Cookie<'static> {
 
 pub fn expire_cookie() -> (Cookie<'static>, Cookie<'static>) {
     // Expire both access and refresh token
-    return (
+    (
         expire_cookie_cn(JWT_ACCESS_TOKEN_KEY),
         expire_cookie_cn(JWT_REFRESH_TOKEN_KEY),
-    );
+    )
 }
 
 #[inline]

@@ -1,9 +1,9 @@
-use actix_web::HttpRequest;
+use actix_web::{HttpRequest, dev::ServiceRequest};
 
 use super::ApiError;
 use crate::services::auth::constants::{JWT_ACCESS_TOKEN_KEY, JWT_REFRESH_TOKEN_KEY};
 
-pub fn extract_access_token(req: &HttpRequest) -> Result<String, ApiError> {
+pub fn extract_access_token(req: &ServiceRequest) -> Result<String, ApiError> {
     tracing::trace!("Extracting JWT Access Token from cookies");
 
     let access_cookie = req

@@ -8,7 +8,7 @@ use futures_util::future::{LocalBoxFuture, Ready, ok};
 use std::rc::Rc;
 
 use arx_gatehouse::{
-    common::constants::X_USER_ID_HEADER,
+    common::{constants::X_USER_ID_HEADER, cookie::extract_access_token},
     db::repos::UserRepo,
     services::{DbManager, JwtService},
 };
@@ -91,13 +91,11 @@ where
             })?;
 
             // Extract token cookie
-            let token_cookie = req
-                .cookie(JwtService::JWT_SESSION_KEY)
-                .ok_or_else(|| ErrorUnauthorized("Missing authentication token"))?;
+            let token = extract_access_token(&req)?;
 
             // Verify token
             let claims = jwt_service
-                .verify_token(token_cookie.value())
+                .verify_token(&token)
                 .map_err(|_| ErrorUnauthorized("Invalid or expired token"))?;
 
             let user_repo = UserRepo::new(&pool);

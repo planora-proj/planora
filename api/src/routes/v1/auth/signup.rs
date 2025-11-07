@@ -1,13 +1,9 @@
-use actix_web::{
-    HttpResponse, Responder,
-    cookie::{Cookie, SameSite},
-    post, web,
-};
+use actix_web::{HttpResponse, Responder, post, web};
 
 use arx_gatehouse::{
     common::{ApiError, ApiResult},
     db::{models::User, repos::UserRepo},
-    services::{DbManager, JwtService},
+    services::{DbManager, JwtService, auth::cookie::build_cookie},
 };
 
 #[cfg_attr(test, derive(serde::Serialize))]
@@ -53,21 +49,16 @@ async fn signup(
         })
         .await?;
 
-    tracing::info!(%email, "user has been created successfuly");
+    tracing::info!(%email, "user created successfuly");
 
-    tracing::trace!(%email, "generating session token");
-    let (access_token, _refresh_token) = jwt_service.generate_tokens(inserted_user.user_id)?;
+    tracing::trace!(%email, "generate session token");
+    let (access_token, refresh_token) = jwt_service.generate_tokens(inserted_user.user_id)?;
+    let (access_token_cookie, refresh_token_cookie) = build_cookie(access_token, refresh_token);
 
-    let cookie = Cookie::build(JwtService::JWT_SESSION_KEY, access_token)
-        .path("/")
-        .secure(false)
-        .http_only(true)
-        .same_site(SameSite::None)
-        .finish();
-
-    tracing::info!("user has been signed up successfully: {email}");
+    tracing::info!(%email, "signed up successfully");
 
     Ok(HttpResponse::Ok()
-        .cookie(cookie)
+        .cookie(access_token_cookie)
+        .cookie(refresh_token_cookie)
         .json(ApiResult::<()>::success_message("signed up successfully")))
 }
