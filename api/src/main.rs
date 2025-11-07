@@ -4,9 +4,11 @@
 */
 
 use actix_cors::Cors;
-use actix_web::{App, HttpServer, middleware, web};
+use actix_web::{App, HttpResponse, HttpServer, middleware, web};
 
-use arx_gatehouse::services;
+use arx_gatehouse::{common::ApiResult, services};
+
+use crate::routes::v1::v1_scope;
 
 mod config;
 mod middlewares;
@@ -16,6 +18,10 @@ mod ws;
 
 pub const fn public_paths() -> [&'static str; 3] {
     ["/v1/auth/signin", "/v1/auth/signup", "/v1/health"]
+}
+
+async fn not_found_handler() -> HttpResponse {
+    HttpResponse::NotFound().json(ApiResult::error("Endpoint not found"))
 }
 
 #[actix_web::main]
@@ -71,16 +77,16 @@ async fn main() -> std::io::Result<()> {
             .wrap(tracing_actix_web::TracingLogger::default())
             .wrap(middleware::NormalizePath::trim())
             .wrap(cors)
-            .wrap(middlewares::AuthMiddleware::new(
-                public_paths().into(),
-                auth_service.clone(),
-                manager.clone(),
-            ))
             .app_data(web::Data::new(manager.clone()))
             .app_data(web::Data::new(auth_service.clone()))
             .route("/ws", web::get().to(ws::ws))
-            .service(routes::v1::v1_scope())
+            .service(v1_scope().wrap(middlewares::AuthMiddleware::new(
+                public_paths().into(),
+                auth_service.clone(),
+                manager.clone(),
+            )))
             .service(routes::internal::internal_routes())
+            .default_service(web::to(not_found_handler))
     })
     .bind(config.addr())?
     .run()
