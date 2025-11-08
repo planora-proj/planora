@@ -5,6 +5,7 @@ import { trace, context } from "@opentelemetry/api";
 
 import { SignUpFormData, SignUpFormActionResponse } from "@/types/auth";
 import { config } from "@/lib/config";
+import { attachCookie } from "@/lib/cookie";
 
 const signupSchema = z.object({
     username: z.string("Please enter a valid username"),
@@ -93,23 +94,30 @@ export async function signupAction(
                     };
                 }
 
+                span?.setStatus({ code: 1, message: "forward session token" });
+                span?.end();
+
+                let setCookieHeaders = response.headers.getSetCookie();
+                await attachCookie(setCookieHeaders);
+
                 span?.setStatus({ code: 1, message: "Sign-up success" });
                 span?.addEvent("redirecting_to_home");
                 span?.end();
 
                 return {
                     success: true,
-                    message: "Sign Up successful",
+                    message: data.message,
+                    redirectTo: "/",
                 };
             } catch (error) {
                 span?.recordException(error as Error);
                 span?.setStatus({ code: 2, message: "Unexpected error" });
                 span?.end();
-                console.error("Sign-up failed:", error);
 
                 return {
                     success: false,
-                    message: "An unexpected error occurred",
+                    message:
+                        "An unexpected error occurred. Please try again later",
                 };
             }
         },

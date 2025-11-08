@@ -5,6 +5,7 @@ import { trace, context } from "@opentelemetry/api";
 
 import { SignInFormData, SignInFormActionResponse } from "@/types/auth";
 import { config } from "@/lib/config";
+import { attachCookie } from "@/lib/cookie";
 
 const signinSchema = z.object({
     email: z.email("Please enter a valid email address"),
@@ -81,20 +82,25 @@ export async function signinAction(
                     };
                 }
 
+                span?.setStatus({ code: 1, message: "forward session token" });
+                span?.end();
+
+                let setCookieHeaders = response.headers.getSetCookie();
+                await attachCookie(setCookieHeaders);
+
                 span?.setStatus({ code: 1, message: "Sign-in success" });
                 span?.addEvent("redirecting_to_home");
                 span?.end();
 
                 return {
                     success: true,
-                    message: "Sign In successful",
+                    message: data.message,
                     redirectTo: "/",
                 };
             } catch (error) {
                 span?.recordException(error as Error);
                 span?.setStatus({ code: 2, message: "Unexpected error" });
                 span?.end();
-                console.error("Sign-in failed:", error);
 
                 return {
                     success: false,
