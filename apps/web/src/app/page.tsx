@@ -3,13 +3,23 @@
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { HeroSection } from "@/components/features/home/hero";
+import { Welcome } from "@/components/features/home/welcome";
+import { useUser } from "@/context/user-context";
 
 export default function HomePage() {
+    const { user } = useUser();
+
     return (
         <div className="min-h-screen bg-background text-foreground">
             <Navbar />
 
-            <main className="py-24 pt-40 px-6 md:px-12">
+            <main className="py-24 px-6 md:px-12">
+                {user ? (
+                    <section className="mb-16">
+                        <Welcome name={user.username} />
+                    </section>
+                ) : null}
+
                 <HeroSection />
             </main>
 

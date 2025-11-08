@@ -47,6 +47,7 @@ export default function SigninPage() {
                 toast.success(`Success: ${state.message}`);
             }
             router.push(state.redirectTo || "/");
+            router.refresh();
         }, 200);
     }, [state, router]);
 
