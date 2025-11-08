@@ -2,6 +2,9 @@ import { cookies } from "next/headers";
 
 import { config } from "@/lib/config";
 
+const API_AUTH_PROFILE = `${config.api}/v1/auth/profile`;
+const API_REFRESH_TOKEN = `${config.api}/v1/auth/refresh`;
+
 export async function fetchUser() {
     try {
         const cookieHeader = (await cookies())
@@ -9,17 +12,31 @@ export async function fetchUser() {
             .map((c) => `${c.name}=${c.value}`)
             .join("; ");
 
-        const res = await fetch(`${config.api}/v1/auth/profile`, {
+        const res = await fetch(API_AUTH_PROFILE, {
             headers: { Cookie: cookieHeader },
             credentials: "include",
             cache: "no-store",
         });
 
-        if (!res.ok) return null;
-
         const data = await res.json();
-        return data.user ?? null;
+        if (!data.success) {
+            await refreshToken();
+            return await fetchUser();
+        }
+
+        return data.payload ?? null;
     } catch (err) {
         return null;
+    }
+}
+
+async function refreshToken() {
+    const res = await fetch(API_REFRESH_TOKEN, {
+        credentials: "include",
+    });
+
+    const data = await res.json();
+    if (!data.success) {
+        throw new Error("authentication failed");
     }
 }
