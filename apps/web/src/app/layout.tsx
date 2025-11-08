@@ -3,8 +3,8 @@ import "./globals.css";
 
 import { ThemeProvider } from "@/context/theme-provider";
 import { ToastProvider } from "@/context/toast-provider";
-import { UserProvider } from "@/context/user-context";
 import { fetchUser } from "@/lib/api/auth";
+import { AppProvider } from "@/context/app-provider";
 
 export const metadata: Metadata = {
     title: "Planora Hall",
@@ -26,7 +26,7 @@ export default async function RootLayout({
                     defaultTheme="system"
                     enableSystem
                 >
-                    <UserProvider userIn={user}>{children}</UserProvider>
+                    <AppProvider user={user}>{children}</AppProvider>
                     <ToastProvider />
                 </ThemeProvider>
             </body>
