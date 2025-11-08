@@ -1,5 +1,5 @@
-import { ReactNode } from "react";
-import { User, UserProvider } from "./user-context";
+import type { ReactNode } from "react";
+import { type User, UserProvider } from "./user-context";
 
 type AppProviderProps = {
     user: User | null;

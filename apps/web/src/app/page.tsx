@@ -1,9 +1,9 @@
 "use client";
 
-import { Navbar } from "@/components/layout/navbar";
-import { Footer } from "@/components/layout/footer";
 import { HeroSection } from "@/components/features/home/hero";
 import { Welcome } from "@/components/features/home/welcome";
+import { Footer } from "@/components/layout/footer";
+import { Navbar } from "@/components/layout/navbar";
 import { useUser } from "@/context/user-context";
 
 export default function HomePage() {

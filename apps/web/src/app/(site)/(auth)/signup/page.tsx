@@ -1,25 +1,24 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { Github, Mail } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Github, Mail } from "lucide-react";
+import { useActionState, useEffect } from "react";
 import { toast } from "sonner";
-
+import { signupAction } from "@/actions/signup";
+import { slideLeft } from "@/components/core/motions";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
     Card,
-    CardHeader,
     CardContent,
     CardFooter,
+    CardHeader,
 } from "@/components/ui/card";
-import { slideLeft } from "@/components/core/motions";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { signupAction } from "@/actions/signup";
-import { SignUpFormActionResponse } from "@/types/auth";
 import { Spinner } from "@/components/ui/spinner";
+import type { SignUpFormActionResponse } from "@/types/auth";
 
 const initialState: SignUpFormActionResponse = {
     success: false,
@@ -37,13 +36,13 @@ export default function SignupPage() {
         if (!state) return;
 
         if (!state?.success) {
-            if (state?.message.trim().length != 0) {
+            if (state?.message.trim().length !== 0) {
                 toast.error(`Error: ${state.message}`);
             }
             return;
         }
         setTimeout(() => {
-            if (state?.message.trim().length != 0) {
+            if (state?.message.trim().length !== 0) {
                 toast.success(`Success: ${state.message}`);
             }
             router.push(state.redirectTo || "/");

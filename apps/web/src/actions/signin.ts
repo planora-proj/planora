@@ -1,11 +1,10 @@
 "use server";
 
+import { context, trace } from "@opentelemetry/api";
 import { z } from "zod";
-import { trace, context } from "@opentelemetry/api";
-
-import { SignInFormData, SignInFormActionResponse } from "@/types/auth";
 import { config } from "@/lib/config";
 import { attachCookie } from "@/lib/cookie";
+import type { SignInFormActionResponse, SignInFormData } from "@/types/auth";
 
 const signinSchema = z.object({
     email: z.email("Please enter a valid email address"),
@@ -85,7 +84,7 @@ export async function signinAction(
                 span?.setStatus({ code: 1, message: "forward session token" });
                 span?.end();
 
-                let setCookieHeaders = response.headers.getSetCookie();
+                const setCookieHeaders = response.headers.getSetCookie();
                 await attachCookie(setCookieHeaders);
 
                 span?.setStatus({ code: 1, message: "Sign-in success" });

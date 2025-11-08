@@ -1,5 +1,5 @@
-import { motion } from "motion/react";
 import { Github } from "lucide-react";
+import { motion } from "motion/react";
 import Link from "next/link";
 
 import { slideLeft } from "@/components/core/motions";

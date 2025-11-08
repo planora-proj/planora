@@ -1,12 +1,11 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
-
-import { cn } from "@/lib/utils";
-import { config } from "@/lib/config";
-import { useUser } from "@/context/user-context";
+import { useRouter } from "next/navigation";
 import { scaleIn, slideUp } from "@/components/core/motions";
+import { useUser } from "@/context/user-context";
+import { config } from "@/lib/config";
+import { cn } from "@/lib/utils";
 
 interface WelcomeProps {
     name: string;
@@ -30,7 +29,7 @@ export function Welcome({ name }: WelcomeProps) {
                     router.refresh();
                 }, 400);
             }, 400);
-        } catch (err) {}
+        } catch (_err) {}
     };
 
     return (

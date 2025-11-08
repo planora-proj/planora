@@ -2,10 +2,9 @@
 
 import { motion } from "motion/react";
 import Link from "next/link";
-
+import { fadeIn, scaleIn, slideUp } from "@/components/core/motions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { fadeIn, scaleIn, slideUp } from "@/components/core/motions";
 
 const features = [
     {
@@ -81,9 +80,9 @@ export function HeroSection() {
             </section>
 
             <section className="grid lg:grid-cols-3 gap-6 max-w-3xl lg:max-w-6xl mx-auto px-6 md:px-12 py-16">
-                {features.map((f, i) => (
+                {features.map((f) => (
                     <motion.div
-                        key={i}
+                        key={f.title}
                         variants={slideUp}
                         initial="hidden"
                         whileInView="show"
@@ -146,9 +145,9 @@ export function HeroSection() {
                 </motion.h2>
 
                 <div className="grid md:grid-cols-3 gap-6">
-                    {testimonials.map((t, i) => (
+                    {testimonials.map((t) => (
                         <motion.div
-                            key={i}
+                            key={t.author}
                             variants={fadeIn}
                             initial="hidden"
                             whileInView="show"

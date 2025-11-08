@@ -25,7 +25,7 @@ export async function fetchUser() {
         }
 
         return data.payload ?? null;
-    } catch (err) {
+    } catch (_err) {
         return null;
     }
 }

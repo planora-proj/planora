@@ -1,11 +1,10 @@
 "use server";
 
+import { context, trace } from "@opentelemetry/api";
 import { z } from "zod";
-import { trace, context } from "@opentelemetry/api";
-
-import { SignUpFormData, SignUpFormActionResponse } from "@/types/auth";
 import { config } from "@/lib/config";
 import { attachCookie } from "@/lib/cookie";
+import type { SignUpFormActionResponse, SignUpFormData } from "@/types/auth";
 
 const signupSchema = z.object({
     username: z.string("Please enter a valid username"),
@@ -57,7 +56,7 @@ export async function signupAction(
                 }
 
                 span?.addEvent("validating_password_and_confirm_password");
-                if (password != confirmPassword)
+                if (password !== confirmPassword)
                     return {
                         success: false,
                         message: "password does not match",
@@ -97,7 +96,7 @@ export async function signupAction(
                 span?.setStatus({ code: 1, message: "forward session token" });
                 span?.end();
 
-                let setCookieHeaders = response.headers.getSetCookie();
+                const setCookieHeaders = response.headers.getSetCookie();
                 await attachCookie(setCookieHeaders);
 
                 span?.setStatus({ code: 1, message: "Sign-up success" });

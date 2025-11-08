@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+import { AppProvider } from "@/context/app-provider";
 import { ThemeProvider } from "@/context/theme-provider";
 import { ToastProvider } from "@/context/toast-provider";
 import { fetchUser } from "@/lib/api/auth";
-import { AppProvider } from "@/context/app-provider";
 
 export const metadata: Metadata = {
     title: "Planora Hall",
