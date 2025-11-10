@@ -1,6 +1,6 @@
 [package]
 name = "arx-gatehouse"
-version = "0.0.1"
+version = "0.1.0"
 authors = ["sajeevan"]
 edition.workspace = true
 license.workspace = true
