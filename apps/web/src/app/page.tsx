@@ -1,5 +1,6 @@
 "use client";
 
+import { EarlyAccessNotice } from "@/components/features/home/early-access";
 import { HeroSection } from "@/components/features/home/hero";
 import { Welcome } from "@/components/features/home/welcome";
 import { Footer } from "@/components/layout/footer";
@@ -14,6 +15,8 @@ export default function HomePage() {
             <Navbar />
 
             <main className="py-24 px-6 md:px-12">
+                <EarlyAccessNotice />
+
                 {user ? (
                     <section className="mb-16">
                         <Welcome name={user.username} />
