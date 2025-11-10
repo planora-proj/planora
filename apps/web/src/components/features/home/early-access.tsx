@@ -28,10 +28,10 @@ export function EarlyAccessNotice() {
             variants={fadeUp}
             className={`${poppins.className} max-w-5xl mx-auto my-8 mb-24 px-4`}
         >
-            <div className="flex bg-gradient-to-r from-indigo-600/20 via-purple-600/10 to-pink-600/20 rounded-2xl shadow-lg border border-muted-foreground/30 overflow-hidden">
+            <div className="flex bg-linear-to-r from-indigo-600/20 via-purple-600/10 to-pink-600/20 rounded-2xl shadow-lg border border-muted-foreground/30 overflow-hidden">
                 <div className="w-2 bg-indigo-600 rounded-l-2xl"></div>
 
-                <div className="flex-1 p-8 md:p-12">
+                <div className="flex-1 p-8 md:p-12 overflow-auto">
                     <h2 className="text-4xl font-extrabold text-foreground mb-4">
                         Welcome to{" "}
                         <span
@@ -51,7 +51,7 @@ export function EarlyAccessNotice() {
                         support to help us build a better tool.
                     </p>
 
-                    <div className="flex justify-center gap-4">
+                    <div className="flex flex-col md:flex-row justify-center gap-4">
                         <Button asChild variant="default">
                             <Link
                                 href="https://github.com/planora-proj/planora/issues"
