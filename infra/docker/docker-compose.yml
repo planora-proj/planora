@@ -1,0 +1,124 @@
+services:
+  traefik:
+    image: traefik:v3.5
+    container_name: planora-traefik
+    restart: unless-stopped
+    command:
+      # --- Core Traefik settings ---
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+
+      # --- Entrypoints ---
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+
+      # --- HTTP → HTTPS redirect ---
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+
+      # --- Let's Encrypt (ACME) ---
+      - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.devresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.devresolver.acme.email=sajeevan@planora.tech"
+      - "--certificatesresolvers.devresolver.acme.storage=/letsencrypt/acme.json"
+      - "--log.level=INFO"
+
+    ports:
+      - "80:80"       # HTTP
+      - "443:443"     # HTTPS
+      - "8081:8080"   # Dashboard
+
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik_letsencrypt:/letsencrypt
+
+    networks:
+      - default
+
+  api:
+    image: arx/planora-api:0.0.1
+    build:
+      context: ../..
+      dockerfile: api/Dockerfile
+    container_name: planora-api
+    restart: unless-stopped
+    labels:
+      # Traefik config
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=Host(`api.planora.sbs`)"
+      - "traefik.http.routers.api.entrypoints=websecure"
+      - "traefik.http.routers.api.tls.certresolver=devresolver"
+      - "traefik.http.services.api.loadbalancer.server.port=8080"
+    environment:
+      - APP_ENV=production
+      - SERVER_HOST=0.0.0.0
+      - SERVER_PORT=8080
+      - NEXT_PUBLIC_BASE_URL=https://planora.sbs
+      - PG_DATABASE_URL=postgres://planora-admin:planora-secret@pg-db:5432/primary
+      - RUST_LOG=trace,arx_gatehouse=trace,mio=info,actix_http=info,actix_server=warn
+      - JWT_SECRET=808aa6d804cf8172dd1bd244e68cd716
+      - JWT_ACCESS_EXPIRY_MINUTES=300
+      - JWT_REFRESH_EXPIRY_DAYS=15
+    depends_on:
+      - pg-db
+    networks:
+      - default
+
+  web:
+    image: arx/planora-hall:0.0.1
+    build:
+      context: ../../apps/web
+      dockerfile: Dockerfile
+    container_name: planora-hall
+    restart: unless-stopped
+    labels:
+      # Traefik config
+      - "traefik.enable=true"
+      # Router for frontend
+      - "traefik.http.routers.web.rule=Host(`planora.sbs`)"
+      - "traefik.http.routers.web.entrypoints=websecure"
+      - "traefik.http.routers.web.tls=true"
+      - "traefik.http.routers.web.tls.certresolver=devresolver"
+      - "traefik.http.services.web.loadbalancer.server.port=3000"
+      # Redirect HTTP to HTTPS
+      - "traefik.http.routers.websecure.entrypoints=web"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      - "traefik.http.routers.web.middlewares=redirect-to-https"
+    environment:
+      - NODE_ENV=production
+      - ARX_PLANORA_API=http://api:8080
+      - NEXT_PUBLIC_API=https://api.planora.sbs
+      - NEXT_PUBLIC_BASE_URL=https://planora.sbs
+    extra_hosts:
+      - "api.planora.sbs:host-gateway"
+    depends_on:
+      - api
+    networks:
+      - default  
+
+  pg-db:
+    image: postgres:17.6-alpine3.22
+    container_name: planora-pg-db
+    environment:
+      - POSTGRES_DB=primary
+      - POSTGRES_USER=planora-admin
+      - POSTGRES_PASSWORD=planora-secret
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - pg-db-data:/var/lib/postgresql/data
+    networks:
+      - default  
+
+volumes:
+  pg-db-data:
+  traefik_letsencrypt:
+
+networks:
+  default:
+    driver: bridge
