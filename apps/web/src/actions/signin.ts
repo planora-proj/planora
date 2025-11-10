@@ -52,13 +52,16 @@ export async function signinAction(
 
                 span?.addEvent("sending_auth_request");
 
-                const response = await fetch(`${config.internal_api}/v1/auth/signin`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
+                const response = await fetch(
+                    `${config.internal_api}/v1/auth/signin`,
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(parsed.data),
                     },
-                    body: JSON.stringify(parsed.data),
-                });
+                );
 
                 span?.setAttribute("response.status_code", response.status);
 
