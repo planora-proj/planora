@@ -1,28 +1,17 @@
 use actix_web::{HttpResponse, Responder, post, web};
 
-use arx_gatehouse::{
-    common::{ApiError, ApiResult},
-    db::{models::User, repos::UserRepo},
-    services::{AuthService, DbManager, auth::cookie::build_cookie},
-};
-
-#[cfg_attr(test, derive(serde::Serialize))]
-#[derive(serde::Deserialize)]
-struct SignupPayload {
-    pub username: String,
-    pub email: String,
-    pub password: String,
-}
+use arx_gatehouse::common::{ApiError, ApiResult};
+use arx_gatehouse::db::{dto::user::CreateUser, repos::UserRepo};
+use arx_gatehouse::services::{AuthService, DbManager, auth::cookie::build_cookie};
 
 #[post("/signup")]
 async fn signup(
     manager: web::Data<DbManager>,
     auth_service: web::Data<AuthService>,
-    payload: web::Json<SignupPayload>,
+    payload: web::Json<CreateUser>,
 ) -> Result<impl Responder, ApiError> {
-    let username = payload.username.clone();
-    let email = payload.email.clone();
-    let password = payload.password.clone();
+    let user = payload.into_inner();
+    let email = user.email.clone();
 
     tracing::trace!(%email, "signing up");
 
@@ -39,16 +28,7 @@ async fn signup(
         _ => {}
     };
 
-    tracing::trace!(%email, "creating a user");
-
-    let inserted_user = user_repo
-        .create_user(&User {
-            username,
-            email: email.clone(),
-            password: Some(password),
-            ..Default::default()
-        })
-        .await?;
+    let inserted_user = user_repo.create_user(&user).await?;
 
     tracing::info!(%email, "user created successfuly");
 

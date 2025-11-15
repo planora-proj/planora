@@ -1,3 +1,4 @@
+pub mod dto;
 mod error;
 pub(crate) mod helpers;
 pub mod models;

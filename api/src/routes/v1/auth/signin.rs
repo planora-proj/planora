@@ -1,17 +1,8 @@
 use actix_web::{HttpResponse, Responder, post, web};
 
-use arx_gatehouse::{
-    common::{ApiError, ApiResult},
-    db::repos::UserRepo,
-    services::{AuthService, DbManager, auth::cookie::build_cookie},
-};
-
-#[cfg_attr(test, derive(serde::Serialize))]
-#[derive(serde::Deserialize)]
-struct SigninPayload {
-    pub email: String,
-    pub password: String,
-}
+use arx_gatehouse::common::{ApiError, ApiResult};
+use arx_gatehouse::db::{dto::user::SigninPayload, repos::UserRepo};
+use arx_gatehouse::services::{AuthService, DbManager, auth::cookie::build_cookie};
 
 #[post("/signin")]
 async fn signin(
@@ -19,8 +10,8 @@ async fn signin(
     auth_service: web::Data<AuthService>,
     payload: web::Json<SigninPayload>,
 ) -> Result<impl Responder, ApiError> {
-    let email = payload.email.clone();
-    let password = payload.password.clone();
+    let email = payload.email.to_owned();
+    let password = payload.password.to_owned();
 
     tracing::trace!(%email, "signing in");
 

@@ -1,17 +1,8 @@
 use actix_web::{HttpRequest, Responder, get, web};
 
-use arx_gatehouse::{
-    common::{ApiError, ApiResult, headers::extract_user_id},
-    db::repos::UserRepo,
-    services::DbManager,
-};
-
-#[derive(serde::Serialize)]
-struct SafeUser {
-    pub user_tag: Option<String>,
-    pub username: String,
-    pub email: String,
-}
+use arx_gatehouse::common::{ApiError, ApiResult, headers::extract_user_id};
+use arx_gatehouse::db::{dto::user::SafeUser, repos::UserRepo};
+use arx_gatehouse::services::DbManager;
 
 #[get("/profile")]
 async fn profile(

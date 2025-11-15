@@ -1,7 +1,7 @@
 use sea_query::*;
 use sqlx::PgPool;
 
-use crate::db::{DBResult, models::Organization};
+use crate::db::{DBResult, dto::organization::CreateOrg, models::Organization};
 
 const PG_TABLE_ORGS: &'static str = "organizations";
 
@@ -14,14 +14,18 @@ impl<'a> OrgRepo<'a> {
         Self { pool }
     }
 
-    pub async fn create_org(&self, org: &Organization) -> DBResult<Organization> {
+    pub async fn create_org(
+        &self,
+        org: &CreateOrg,
+        owner_id: uuid::Uuid,
+    ) -> DBResult<Organization> {
         let query = Query::insert()
             .into_table(Alias::new(PG_TABLE_ORGS))
             .columns(["owner_id", "name", "subdomain"])
             .values_panic([
-                org.owner_id.clone().to_string().into(),
-                org.name.clone().into(),
-                org.subdomain.clone().into(),
+                owner_id.into(),
+                org.name.to_owned().into(),
+                org.subdomain.to_owned().into(),
             ])
             .returning_all()
             .to_string(PostgresQueryBuilder);

@@ -1,17 +1,8 @@
 use actix_web::{HttpRequest, Responder, post, web};
 
-use arx_gatehouse::{
-    common::{ApiError, ApiResult, headers::extract_user_id},
-    db::{models::Organization, repos::OrgRepo},
-    services::DbManager,
-};
-
-#[cfg_attr(test, derive(serde::Serialize))]
-#[derive(serde::Deserialize)]
-struct CreateOrg {
-    pub name: String,
-    pub subdomain: String,
-}
+use arx_gatehouse::common::{ApiError, ApiResult, headers::extract_user_id};
+use arx_gatehouse::db::{dto::organization::CreateOrg, repos::OrgRepo};
+use arx_gatehouse::services::DbManager;
 
 #[post("")]
 async fn create_organization(
@@ -19,9 +10,7 @@ async fn create_organization(
     payload: web::Json<CreateOrg>,
     req: HttpRequest,
 ) -> Result<impl Responder, ApiError> {
-    let org_name = payload.name.clone();
-    let org_domain = payload.subdomain.clone();
-
+    let org = payload.into_inner();
     let user_id = extract_user_id(&req)?;
 
     tracing::trace!(%user_id, "create organization");
@@ -29,14 +18,7 @@ async fn create_organization(
     let pool = manager.get_planora_pool().await?;
     let org_repo = OrgRepo::new(&pool);
 
-    let inserted_org = org_repo
-        .create_org(&Organization {
-            owner_id: user_id,
-            name: org_name,
-            subdomain: org_domain,
-            ..Default::default()
-        })
-        .await?;
+    let inserted_org = org_repo.create_org(&org, user_id).await?;
 
     tracing::info!(%user_id, "created organization");
 

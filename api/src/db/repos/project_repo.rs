@@ -1,7 +1,12 @@
 use sea_query::*;
 use sqlx::PgPool;
 
-use crate::db::{DBResult, helpers::with_org, models::Project};
+use crate::db::{
+    DBResult,
+    dto::project::{CreateProject, DeleteProject},
+    helpers::with_org,
+    models::Project,
+};
 
 const PG_TABLE_PROJECTS: &'static str = "projects";
 
@@ -14,15 +19,19 @@ impl<'a> ProjectRepo<'a> {
         Self { pool }
     }
 
-    pub async fn create_project(&self, project: &Project, org_id: uuid::Uuid) -> DBResult<Project> {
+    pub async fn create_project(
+        &self,
+        project: &CreateProject,
+        org_id: uuid::Uuid,
+    ) -> DBResult<Project> {
         let query = Query::insert()
             .into_table(Alias::new(PG_TABLE_PROJECTS))
             .columns(["organization_id", "name", "description"])
-            .values_panic([
-                project.organization_id.clone().to_string().into(),
+            .values([
+                org_id.into(),
                 project.name.clone().into(),
                 project.description.clone().into(),
-            ])
+            ])?
             .returning_all()
             .to_string(PostgresQueryBuilder);
 
@@ -82,12 +91,12 @@ impl<'a> ProjectRepo<'a> {
 
     pub async fn delete_by_projectid(
         &self,
-        project_id: uuid::Uuid,
+        project: DeleteProject,
         org_id: uuid::Uuid,
     ) -> DBResult<u64> {
         let query = Query::delete()
             .from_table(Alias::new(PG_TABLE_PROJECTS))
-            .and_where(Expr::col(Alias::new("project_id")).eq(project_id.to_string()))
+            .and_where(Expr::col(Alias::new("project_id")).eq(project.project_id.to_string()))
             .to_string(PostgresQueryBuilder);
 
         let result = with_org(self.pool, &org_id, |mut tx| async move {

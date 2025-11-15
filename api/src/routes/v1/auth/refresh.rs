@@ -1,9 +1,7 @@
 use actix_web::{HttpRequest, HttpResponse, Responder, get, web};
 
-use arx_gatehouse::{
-    common::{ApiError, ApiResult, cookie::extract_refresh_token},
-    services::{AuthService, auth::cookie::build_cookie_cn},
-};
+use arx_gatehouse::common::{ApiError, ApiResult, cookie::extract_refresh_token};
+use arx_gatehouse::services::{AuthService, auth::cookie::build_cookie_cn};
 
 #[get("/refresh")]
 async fn refresh(

@@ -1,9 +1,7 @@
 use actix_web::{HttpRequest, HttpResponse, Responder, post};
 
-use arx_gatehouse::{
-    common::{ApiError, ApiResult, headers::extract_user_id},
-    services::auth::cookie::expire_cookie,
-};
+use arx_gatehouse::common::{ApiError, ApiResult, headers::extract_user_id};
+use arx_gatehouse::services::auth::cookie::expire_cookie;
 
 #[post("/signout")]
 async fn signout(req: HttpRequest) -> Result<impl Responder, ApiError> {

@@ -1,10 +1,8 @@
 use actix_web::{HttpRequest, Responder, get, web};
 
-use arx_gatehouse::{
-    common::{ApiError, ApiResult, headers::extract_user_id},
-    db::repos::OrgRepo,
-    services::DbManager,
-};
+use arx_gatehouse::common::{ApiError, ApiResult, headers::extract_user_id};
+use arx_gatehouse::db::repos::OrgRepo;
+use arx_gatehouse::services::DbManager;
 
 #[get("")]
 async fn list_organizations(

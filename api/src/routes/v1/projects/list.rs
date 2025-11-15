@@ -1,11 +1,9 @@
 use actix_web::{HttpRequest, Responder, get, web};
 
 use super::helper::validate_org;
-use arx_gatehouse::{
-    common::{ApiError, ApiResult, headers::extract_org_id},
-    db::repos::ProjectRepo,
-    services::DbManager,
-};
+use arx_gatehouse::common::{ApiError, ApiResult, headers::extract_org_id};
+use arx_gatehouse::db::repos::ProjectRepo;
+use arx_gatehouse::services::DbManager;
 
 #[get("")]
 async fn list_projects(

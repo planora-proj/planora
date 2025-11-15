@@ -1,7 +1,7 @@
 use sea_query::*;
 use sqlx::PgPool;
 
-use crate::db::{DBResult, models::User};
+use crate::db::{DBResult, dto::user::CreateUser, models::User};
 
 const PG_TABLE_USERS: &'static str = "users";
 
@@ -14,26 +14,18 @@ impl<'a> UserRepo<'a> {
         Self { pool }
     }
 
-    pub async fn create_user(&self, user: &User) -> DBResult<User> {
+    pub async fn create_user(&self, user: &CreateUser) -> DBResult<User> {
         let query = Query::insert()
             .into_table(Alias::new(PG_TABLE_USERS))
             .columns([
-                Alias::new("user_tag"),
                 Alias::new("username"),
                 Alias::new("email"),
                 Alias::new("password"),
-                Alias::new("timezone"),
-                Alias::new("avatar_url"),
-                Alias::new("google_sub"),
             ])
             .values_panic([
-                user.user_tag.clone().into(),
-                user.username.clone().into(),
-                user.email.clone().into(),
-                user.password.clone().into(),
-                user.timezone.clone().into(),
-                user.avatar_url.clone().into(),
-                user.google_sub.clone().into(),
+                user.username.to_owned().into(),
+                user.email.to_owned().into(),
+                user.password.to_owned().into(),
             ])
             .returning_all()
             .to_string(PostgresQueryBuilder);
