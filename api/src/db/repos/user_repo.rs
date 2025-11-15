@@ -1,7 +1,7 @@
 use sea_query::*;
 use sqlx::PgPool;
 
-use crate::db::models::User;
+use crate::db::{DBResult, models::User};
 
 const PG_TABLE_USERS: &'static str = "users";
 
@@ -14,7 +14,7 @@ impl<'a> UserRepo<'a> {
         Self { pool }
     }
 
-    pub async fn create_user(&self, user: &User) -> sqlx::Result<User> {
+    pub async fn create_user(&self, user: &User) -> DBResult<User> {
         let query = Query::insert()
             .into_table(Alias::new(PG_TABLE_USERS))
             .columns([
@@ -45,7 +45,7 @@ impl<'a> UserRepo<'a> {
         Ok(user)
     }
 
-    pub async fn find_by_email(&self, email: String) -> sqlx::Result<Option<User>> {
+    pub async fn find_by_email(&self, email: String) -> DBResult<Option<User>> {
         let query = Query::select()
             .column(Asterisk)
             .from(Alias::new(PG_TABLE_USERS))
@@ -58,7 +58,7 @@ impl<'a> UserRepo<'a> {
         Ok(user)
     }
 
-    pub async fn find_by_userid(&self, userid: uuid::Uuid) -> sqlx::Result<Option<User>> {
+    pub async fn find_by_userid(&self, userid: uuid::Uuid) -> DBResult<Option<User>> {
         let query = Query::select()
             .column(Asterisk)
             .from(Alias::new(PG_TABLE_USERS))
@@ -71,7 +71,7 @@ impl<'a> UserRepo<'a> {
         Ok(user)
     }
 
-    pub async fn find_by_usertag(&self, usertag: String) -> sqlx::Result<Option<User>> {
+    pub async fn find_by_usertag(&self, usertag: String) -> DBResult<Option<User>> {
         let query = Query::select()
             .column(Asterisk)
             .from(Alias::new(PG_TABLE_USERS))
@@ -84,7 +84,7 @@ impl<'a> UserRepo<'a> {
         Ok(user)
     }
 
-    pub async fn delete_by_email(&self, email: String) -> sqlx::Result<u64> {
+    pub async fn delete_by_email(&self, email: String) -> DBResult<u64> {
         let query = Query::delete()
             .from_table(Alias::new(PG_TABLE_USERS))
             .and_where(Expr::col(Alias::new("email")).eq(email))
@@ -94,7 +94,7 @@ impl<'a> UserRepo<'a> {
         Ok(result.rows_affected())
     }
 
-    pub async fn list_users(&self, limit: u64, offset: u64) -> sqlx::Result<Vec<User>> {
+    pub async fn list_users(&self, limit: u64, offset: u64) -> DBResult<Vec<User>> {
         let query = Query::select()
             .column(Asterisk)
             .from(Alias::new(PG_TABLE_USERS))

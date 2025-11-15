@@ -1,7 +1,7 @@
 use sea_query::*;
 use sqlx::PgPool;
 
-use crate::db::{helpers::with_org, models::Project};
+use crate::db::{DBResult, helpers::with_org, models::Project};
 
 const PG_TABLE_PROJECTS: &'static str = "projects";
 
@@ -14,11 +14,7 @@ impl<'a> ProjectRepo<'a> {
         Self { pool }
     }
 
-    pub async fn create_project(
-        &self,
-        project: &Project,
-        org_id: uuid::Uuid,
-    ) -> sqlx::Result<Project> {
+    pub async fn create_project(&self, project: &Project, org_id: uuid::Uuid) -> DBResult<Project> {
         let query = Query::insert()
             .into_table(Alias::new(PG_TABLE_PROJECTS))
             .columns(["organization_id", "name", "description"])
@@ -46,7 +42,7 @@ impl<'a> ProjectRepo<'a> {
         &self,
         project_id: uuid::Uuid,
         org_id: uuid::Uuid,
-    ) -> sqlx::Result<Option<Project>> {
+    ) -> DBResult<Option<Project>> {
         let query = Query::select()
             .column(Asterisk)
             .from(PG_TABLE_PROJECTS)
@@ -65,7 +61,7 @@ impl<'a> ProjectRepo<'a> {
         Ok(project)
     }
 
-    pub async fn find_by_orgid(&self, org_id: uuid::Uuid) -> sqlx::Result<Vec<Project>> {
+    pub async fn find_by_orgid(&self, org_id: uuid::Uuid) -> DBResult<Vec<Project>> {
         let query = Query::select()
             .column(Asterisk)
             .from(PG_TABLE_PROJECTS)
@@ -88,7 +84,7 @@ impl<'a> ProjectRepo<'a> {
         &self,
         project_id: uuid::Uuid,
         org_id: uuid::Uuid,
-    ) -> sqlx::Result<u64> {
+    ) -> DBResult<u64> {
         let query = Query::delete()
             .from_table(Alias::new(PG_TABLE_PROJECTS))
             .and_where(Expr::col(Alias::new("project_id")).eq(project_id.to_string()))

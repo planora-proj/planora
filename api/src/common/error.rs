@@ -1,13 +1,13 @@
 use actix_web::{HttpResponse, ResponseError};
 
 use super::ApiResult;
-use crate::services::auth::AuthError;
+use crate::{db::DatabaseError, services::auth::AuthError};
 
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
 pub enum ApiError {
     #[error("Database error: {0}")]
-    DatabaseError(#[from] sqlx::Error),
+    DatabaseError(#[from] DatabaseError),
 
     #[error("Authentication error: {0}")]
     AuthError(#[from] AuthError),

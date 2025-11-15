@@ -1,7 +1,7 @@
 use sea_query::*;
 use sqlx::PgPool;
 
-use crate::db::models::Organization;
+use crate::db::{DBResult, models::Organization};
 
 const PG_TABLE_ORGS: &'static str = "organizations";
 
@@ -14,7 +14,7 @@ impl<'a> OrgRepo<'a> {
         Self { pool }
     }
 
-    pub async fn create_org(&self, org: &Organization) -> sqlx::Result<Organization> {
+    pub async fn create_org(&self, org: &Organization) -> DBResult<Organization> {
         let query = Query::insert()
             .into_table(Alias::new(PG_TABLE_ORGS))
             .columns(["owner_id", "name", "subdomain"])
@@ -33,7 +33,7 @@ impl<'a> OrgRepo<'a> {
         Ok(inserted_org)
     }
 
-    pub async fn find_by_ownerid(&self, owner_id: uuid::Uuid) -> sqlx::Result<Vec<Organization>> {
+    pub async fn find_by_ownerid(&self, owner_id: uuid::Uuid) -> DBResult<Vec<Organization>> {
         let query = Query::select()
             .column(Asterisk)
             .from(PG_TABLE_ORGS)
@@ -46,7 +46,7 @@ impl<'a> OrgRepo<'a> {
         Ok(org)
     }
 
-    pub async fn find_by_orgid(&self, org_id: uuid::Uuid) -> sqlx::Result<Option<Organization>> {
+    pub async fn find_by_orgid(&self, org_id: uuid::Uuid) -> DBResult<Option<Organization>> {
         let query = Query::select()
             .column(Asterisk)
             .from(PG_TABLE_ORGS)
@@ -59,7 +59,7 @@ impl<'a> OrgRepo<'a> {
         Ok(org)
     }
 
-    pub async fn delete_by_orgid(&self, org_id: uuid::Uuid) -> sqlx::Result<u64> {
+    pub async fn delete_by_orgid(&self, org_id: uuid::Uuid) -> DBResult<u64> {
         let query = Query::delete()
             .from_table(Alias::new(PG_TABLE_ORGS))
             .and_where(Expr::col(Alias::new("organization_id")).eq(org_id.to_string()))
@@ -69,7 +69,7 @@ impl<'a> OrgRepo<'a> {
         Ok(result.rows_affected())
     }
 
-    pub async fn delete_by_subdomain(&self, subdomain: String) -> sqlx::Result<u64> {
+    pub async fn delete_by_subdomain(&self, subdomain: String) -> DBResult<u64> {
         let query = Query::delete()
             .from_table(Alias::new(PG_TABLE_ORGS))
             .and_where(Expr::col(Alias::new("subdomain")).eq(subdomain))
